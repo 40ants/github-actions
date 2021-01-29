@@ -110,11 +110,10 @@
        (+ (loop for child being the hash-value of children
                 summing (width child))
            (* margin
-              (1+ (hash-table-count children)))))
+              (1- (hash-table-count children)))))
       (:column
-       (+ (* margin 2)
-           (loop for child being the hash-value of children
-                 maximizing (width child)))))))
+       (loop for child being the hash-value of children
+             maximizing (width child))))))
 
 
 (defmethod header-height ((obj container))
@@ -186,10 +185,11 @@
                                            :size font-size))
            (text-width (anafanafo:string-width font-data title)))
 
-      (cl-svg:draw group
-          (:rect :x 0 :y 0 :width full-width :height full-height)
-          :stroke "#FFAA66"
-          :fill "white")
+      ;; DEBUG frame
+      ;; (cl-svg:draw group
+      ;;     (:rect :x 0 :y 0 :width full-width :height full-height)
+      ;;     :stroke "#FFAA66"
+      ;;     :fill "white")
 
       (let* ((max-title-width (- full-width
                                   (* margin 2)))
@@ -200,7 +200,7 @@
                       text-width)
                    1.0)))
         (cl-svg:transform
-            ((cl-svg:translate (1+ (* 2 margin))
+            ((cl-svg:translate (1+ margin)
                                (1+ (+ margin
                                        font-size)))
              (cl-svg:scale scale))
@@ -216,7 +216,7 @@
             title))
        
         (cl-svg:transform
-            ((cl-svg:translate (* 2 margin)
+            ((cl-svg:translate margin
                                (+ margin
                                    font-size))
              (cl-svg:scale scale))
@@ -232,7 +232,7 @@
 
       (ecase (orientation obj)
         (:row
-         (loop with x = margin
+         (loop with x = 0
                with y = (+ (header-height obj)
                             margin)
                for child being the hash-value of children
@@ -244,7 +244,7 @@
                         (+ (width child)
                             margin))))
         (:column
-         (loop with x = margin
+         (loop with x = 0
                with y = (+ (header-height obj)
                             margin)
                for child being the hash-value of children
