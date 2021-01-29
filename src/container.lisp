@@ -83,12 +83,13 @@
 ;;           new-value)))
 
 
-(defmethod child ((obj container) name)
+(defmethod child ((obj container) name &optional default)
   (with-slots (children) obj
     (or (gethash name children)
         (setf (gethash name children)
-              (make-instance 'container
-                             :title name)))))
+              (or default
+                  (make-instance 'container
+                                 :title name))))))
 
 
 (defun orientation (container)
@@ -158,16 +159,20 @@
 
 (defmethod draw ((obj container) svg)
   (with-slots (children) obj
-    (cond
-      ;; If there is only one child, then there is no reason
-      ;; to render outer container
-      ((= (hash-table-count children)
-          1)
-       (draw (first (alexandria:hash-table-values children))
-           svg))
-      ;; Otherwise, draw them all!
-      (t
-       (inner-draw obj svg)))))
+    (let* ((children (alexandria:hash-table-values children))
+           (first-child (car children)))
+      (cond
+        ;; If there is only one child and it is not a tight,
+        ;; then there is no reason
+        ;; to render outer container
+        ((and (= (length children)
+                 1)
+              (not (typep first-child
+                          'tight-container)))
+         (draw first-child svg))
+        ;; Otherwise, draw them all!
+        (t
+         (inner-draw obj svg))))))
 
 
 (defmethod inner-draw ((obj container) svg)
@@ -267,7 +272,13 @@
             do (cl-svg:transform (cl-svg:translate
                                   x
                                   y)
-                 (draw child group))
+                 (let ((child-svg (draw child group)))
+                   ;; Now we need to draw a delimiter line
+                   (cl-svg:draw child-svg
+                       (:line :x1 0 :y1 0
+                              :x2 0 :y2 (height child))
+                       :stroke "white")
+                   child-svg))
                (incf x
                      (width child)))
       (values group))))

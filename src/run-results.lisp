@@ -7,7 +7,8 @@
   (:import-from #:github-matrix/box
                 #:success-box
                 #:fail-box
-                #:in-progress-box))
+                #:in-progress-box)
+  (:import-from #:cl-ppcre))
 (in-package github-matrix/run-results)
 
 
@@ -45,19 +46,23 @@
 
 (defun runs-to-boxes (workflow &key (runs (github-matrix/run::get-last-run workflow)))
   "Преобразует список, полученный через get-last-run в containers со статусами."
-  (let* ((matrix (github-matrix/matrix::workflow-matrix workflow))
-         ;; TODO: Remove this debug info
-         ;; (matrix '(("run_tests" "os" "quicklisp-dist" "lisp")))
-         )
+  (let* ((matrix (github-matrix/matrix::workflow-matrix workflow)))
     (labels ((add-box-to (node names &key box-type)
-               (if (= (length names)
-                      1)
-                   (setf (github-matrix/container::child node (car names))
-                         (make-instance box-type
-                                        :text (car names)))
-                   (add-box-to (github-matrix/container::child node (car names))
-                               (cdr names)
-                               :box-type box-type))))
+               (cond
+                 ((= (length names)
+                     1)
+                  (destructuring-bind (group-name cell-name)
+                      (cl-ppcre:split " = " (car names))
+                    (let* ((node (github-matrix/container::child
+                                  node group-name
+                                  (github-matrix/container::make-tight-container group-name))))
+                      (setf (github-matrix/container::child node cell-name)
+                            (make-instance box-type
+                                           :text cell-name)))))
+                 (t
+                  (add-box-to (github-matrix/container::child node (car names))
+                              (cdr names)
+                              :box-type box-type)))))
       (loop with root = (github-matrix/container::make-container (github-matrix/workflow::name workflow))
             for run in runs
             for status = (github-matrix/run::status run)
@@ -70,11 +75,6 @@
                                 (t 'fail-box))))
             for chain = (parse-run-name matrix
                                         run)
-            ;; TODO: Remove this debug info
-            ;; for chain = (list (first chain1)
-            ;;                   (third chain1)
-            ;;                   (fourth chain1)
-            ;;                   (second chain1))
             do (add-box-to root chain
                            :box-type box-type)
             finally (return root)))))
