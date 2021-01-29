@@ -1,9 +1,13 @@
 (defpackage #:github-matrix/colors
   (:use #:cl)
   (:export
-   #:*tight-container-plate*))
+   #:*tight-container-title-background*
+   #:*tight-container-title-color*))
 (in-package github-matrix/colors)
 
 
-(defparameter *tight-container-plate*
-  "#2E8B99")
+(defparameter *tight-container-title-color*
+  "#EEE")
+
+(defparameter *tight-container-title-background*
+  "#434343")

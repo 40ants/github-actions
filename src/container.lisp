@@ -8,7 +8,12 @@
                 #:font-family
                 #:font-weight
                 #:font-size)
-  (:import-from #:github-matrix/box))
+  (:import-from #:github-matrix/box)
+  (:import-from #:github-matrix/colors
+                #:*tight-container-title-background*
+                #:*tight-container-title-color*)
+  (:import-from #:github-matrix/svg
+                #:draw-box-with-text))
 (in-package github-matrix/container)
 
 
@@ -21,14 +26,30 @@
 
 
 (defclass tight-container (container)
-  ()
-  (:default-initargs :margin 0))
+  ((title-box))
+  (:default-initargs
+   :margin 0
+   :title-background *tight-container-title-background*
+   :title-color *tight-container-title-color*))
 
 
 (defmethod print-object ((obj container) stream)
   (print-unreadable-object (obj stream :type t)
     (format stream "\"~A\""
             (slot-value obj 'title))))
+
+(defmethod initialize-instance :after ((obj tight-container)
+                                       &rest initargs
+                                       &key
+                                         title
+                                         title-color
+                                         title-background)
+  (declare (ignore initargs))
+  (setf (slot-value obj 'title-box)
+        (make-instance 'github-matrix/box::box
+                       :text title
+                       :color title-color
+                       :background title-background)))
 
 
 (defmethod (setf child) (new-value (obj container) name)
@@ -105,6 +126,21 @@
               (loop for child being the hash-value of children
                     summing (height child)))))
         (header-height obj))))
+
+
+(defmethod width ((obj tight-container))
+  (with-slots (children title-box)
+      obj
+    (+ (width title-box)
+        (loop for child being the hash-value of children
+              summing (width child)))))
+
+
+(defmethod height ((obj tight-container))
+  (with-slots (children)
+      obj
+    (loop for child being the hash-value of children
+          maximizing (height child))))
 
 
 (defvar *level* 0)
@@ -209,71 +245,21 @@
 
 (defmethod inner-draw ((obj tight-container) svg)
   ;; Tight container always drawn as a row.
-  (with-slots (children font-family font-weight font-size margin title) obj
+  (with-slots (children font-family font-weight font-size margin title-box) obj
     (let* ((*level* (1+ *level*))
-           (group (cl-svg:make-group svg ()))
-           (full-width (width obj))
-           (full-height (height obj))
-           (font-data (anafanafo:load-data :family font-family
-                                           :weight font-weight
-                                           :size font-size))
-           (text-width (anafanafo:string-width font-data title)))
+           (group (cl-svg:make-group svg ())))
+      
+      (draw title-box group)
 
-      (cl-svg:draw group
-          (:rect :x 0 :y 0 :width full-width :height full-height)
-          :stroke "#FFAA66"
-          :fill "white")
-
-      (let* ((max-title-width (- full-width
-                                  (* margin 2)))
-             (scale
-               (if (> text-width
-                      max-title-width)
-                   (/ max-title-width
-                      text-width)
-                   1.0)))
-        (cl-svg:transform
-            ((cl-svg:translate (1+ (* 2 margin))
-                               (1+ (+ margin
-                                       font-size)))
-             (cl-svg:scale scale))
-          (cl-svg:text group
-              (:x 0
-               :y 0
-               :font-family font-family
-               :font-weight font-weight
-               :font-size font-size
-               :fill "#ccc"
-               :fill-opacity 0.5
-               :text-length text-width)
-            title))
-       
-        (cl-svg:transform
-            ((cl-svg:translate (* 2 margin)
-                               (+ margin
-                                   font-size))
-             (cl-svg:scale scale))
-          (cl-svg:text group
-              (:x 0
-               :y 0
-               :font-family font-family
-               :font-weight font-weight
-               :font-size font-size
-               :fill "#555"
-               :text-length text-width)
-            title)))
-
-      (loop with x = margin
-            with y = (+ (header-height obj)
-                         margin)
+      (loop with x = (width title-box)
+            with y = 0
             for child being the hash-value of children
             do (cl-svg:transform (cl-svg:translate
                                   x
                                   y)
                  (draw child group))
                (incf x
-                     (+ (width child)
-                         margin)))
+                     (width child)))
       (values group))))
 
 
