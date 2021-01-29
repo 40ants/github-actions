@@ -3,13 +3,16 @@
 (in-package github-matrix/base-obj)
 
 
+(defparameter *default-font-size* 16)
+
+
 (defclass obj-with-font ()
   ((font-family :initarg :font-family
                 :initform "Helvetica")
    (font-weight :initarg :font-weight
                 :initform "Bold")
    (font-size :initarg :font-size
-              :initform 16)))
+              :initform *default-font-size*)))
 
 
 (defgeneric draw (obj svg))

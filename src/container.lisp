@@ -153,9 +153,6 @@
           maximizing (height child))))
 
 
-(defvar *level* 0)
-
-
 (defmethod draw ((obj container) svg)
   (with-slots (children) obj
     (let* ((children (alexandria:hash-table-values children))
@@ -176,10 +173,8 @@
 
 (defmethod inner-draw ((obj container) svg)
   (with-slots (children font-family font-weight font-size margin title) obj
-    (let* ((*level* (1+ *level*))
-           (group (cl-svg:make-group svg ()))
+    (let* ((group (cl-svg:make-group svg ()))
            (full-width (width obj))
-           (full-height (height obj))
            (font-data (anafanafo:load-data :family font-family
                                            :weight font-weight
                                            :size font-size))
@@ -261,8 +256,7 @@
 (defmethod inner-draw ((obj tight-container) svg)
   ;; Tight container always drawn as a row.
   (with-slots (children font-family font-weight font-size margin title-box) obj
-    (let* ((*level* (1+ *level*))
-           (group (cl-svg:make-group svg ())))
+    (let* ((group (cl-svg:make-group svg ())))
       
       (draw title-box group)
 
