@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/repo
+(mgl-pax-minimal:define-package #:github-matrix/repo
   (:use #:cl)
   (:import-from #:rutils
                 #:fmt))

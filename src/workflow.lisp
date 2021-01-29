@@ -1,5 +1,6 @@
-(defpackage #:github-matrix/workflow
+(mgl-pax-minimal:define-package #:github-matrix/workflow
   (:use #:cl)
+  (:import-from #:github-matrix/repo)
   (:import-from #:rutils
                 #:fmt))
 (in-package github-matrix/workflow)
@@ -42,11 +43,8 @@
 
 
 (defun workflow-content (workflow)
-  (get-file (repo workflow)
-            (path workflow)))
+  (github-matrix/repo::get-file (repo workflow)
+                                (path workflow)))
 
-
-(defun workflow-matrix (workflow)
-  (parse-matrix (workflow-content workflow)))
 
 

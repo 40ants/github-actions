@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/svg
+(mgl-pax-minimal:define-package #:github-matrix/svg
   (:use #:cl)
   (:import-from #:cl-svg)
   (:import-from #:anafanafo)

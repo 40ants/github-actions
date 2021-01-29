@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/yaml
+(mgl-pax-minimal:define-package #:github-matrix/yaml
   (:use #:cl))
 (in-package github-matrix/yaml)
 

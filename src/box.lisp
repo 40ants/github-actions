@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/box
+(mgl-pax-minimal:define-package #:github-matrix/box
   (:use #:cl)
   (:import-from #:github-matrix/base-obj
                 #:obj-with-font
@@ -36,7 +36,9 @@
   (:default-initargs :background "#E6705C"))
 
 
-
+(defclass in-progress-box (box)
+  ()
+  (:default-initargs :background "#838383"))
 
 
 (defmethod print-object ((obj box) stream)

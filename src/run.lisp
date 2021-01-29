@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/run
+(mgl-pax-minimal:define-package #:github-matrix/run
   (:use #:cl)
   (:import-from #:rutils
                 #:fmt)

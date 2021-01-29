@@ -1,5 +1,7 @@
-(defpackage #:github-matrix/matrix
-  (:use #:cl))
+(mgl-pax-minimal:define-package #:github-matrix/matrix
+  (:use #:cl)
+  (:import-from #:github-matrix/workflow)
+  (:import-from #:github-matrix/yaml))
 (in-package github-matrix/matrix)
 
 
@@ -11,7 +13,7 @@
 
 
 (defun parse-matrix (workflow-content)
-  (let* ((doc (getf (parse-string workflow-content)
+  (let* ((doc (getf (github-matrix/yaml::parse-string workflow-content)
                     :documents)))
     (flet ((g (node name)
              (second (assoc name node :test 'string-equal))))
@@ -26,3 +28,7 @@
                                (remove-if #'matrix-keyword
                                           (mapcar #'first
                                                   matrix))))))))
+
+
+(defun workflow-matrix (workflow)
+  (parse-matrix (github-matrix/workflow::workflow-content workflow)))

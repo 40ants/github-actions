@@ -1,6 +1,13 @@
-(defpackage #:github-matrix/run-results
+(mgl-pax-minimal:define-package #:github-matrix/run-results
   (:use #:cl)
-  (:import-from #:github-matrix/run))
+  (:import-from #:github-matrix/run)
+  (:import-from #:github-matrix/container)
+  (:import-from #:github-matrix/workflow)
+  (:import-from #:github-matrix/matrix)
+  (:import-from #:github-matrix/box
+                #:success-box
+                #:fail-box
+                #:in-progress-box))
 (in-package github-matrix/run-results)
 
 
@@ -38,32 +45,36 @@
 
 (defun runs-to-boxes (workflow &key (runs (github-matrix/run::get-last-run workflow)))
   "Преобразует список, полученный через get-last-run в containers со статусами."
-  (let* (;; (matrix (workflow-matrix workflow))
+  (let* ((matrix (github-matrix/matrix::workflow-matrix workflow))
          ;; TODO: Remove this debug info
-         (matrix '(("run_tests" "os" "quicklisp-dist" "lisp"))))
+         ;; (matrix '(("run_tests" "os" "quicklisp-dist" "lisp")))
+         )
     (labels ((add-box-to (node names &key box-type)
                (if (= (length names)
                       1)
-                   (setf (child node (car names))
+                   (setf (github-matrix/container::child node (car names))
                          (make-instance box-type
                                         :text (car names)))
-                   (add-box-to (child node (car names))
+                   (add-box-to (github-matrix/container::child node (car names))
                                (cdr names)
                                :box-type box-type))))
-      (loop with root = (make-instance 'container :title (name workflow))
+      (loop with root = (github-matrix/container::make-container (github-matrix/workflow::name workflow))
             for run in runs
-            for conclusion = (conclusion run)
-            for box-type = (if (eql conclusion
-                                    :success)
-                               'success-box
-                               'fail-box)
-            for chain1 = (parse-run-name matrix
-                                         run)
+            for status = (github-matrix/run::status run)
+            for conclusion = (github-matrix/run::conclusion run)
+            for box-type = (case status
+                             (:in_progress 'in-progress-box)
+                             (t
+                              (case conclusion
+                                (:success 'success-box)
+                                (t 'fail-box))))
+            for chain = (parse-run-name matrix
+                                        run)
             ;; TODO: Remove this debug info
-            for chain = (list (first chain1)
-                              (third chain1)
-                              (fourth chain1)
-                              (second chain1))
+            ;; for chain = (list (first chain1)
+            ;;                   (third chain1)
+            ;;                   (fourth chain1)
+            ;;                   (second chain1))
             do (add-box-to root chain
                            :box-type box-type)
             finally (return root)))))

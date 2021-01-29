@@ -1,6 +1,8 @@
-(defpackage #:github-matrix/playground
+(mgl-pax-minimal:define-package #:github-matrix/playground
   (:use #:cl)
   (:import-from #:cl-svg)
+  (:import-from #:github-matrix/run-results)
+  (:import-from #:github-matrix/workflow)
   (:import-from #:github-matrix/container
                 #:tight-container
                 #:child)
@@ -13,11 +15,13 @@
 (in-package github-matrix/playground)
 
 
-(defparameter *repo* nil)
+(defvar *repo* nil)
 
-(defparameter *workflow* nil)
+(defvar *workflow* nil)
 
-(defparameter *root* nil)
+(defvar *runs* nil)
+
+(defvar *root* nil)
 
 
 (defun render-test-image ()
@@ -27,8 +31,18 @@
     (values)))
 
 
-(defun retrieve-data ()
-  (github-matrix/repo::make-repo "40ants" "cl-info" :branch "master"))
+(defun retrieve-data (&key dont-fetch-runs)
+  (setf *repo*
+        (github-matrix/repo::make-repo "40ants" "cl-info" :branch "master"))
+
+  (setf *workflow*
+        (first (github-matrix/workflow::get-workflows *repo*)))
+
+  (unless dont-fetch-runs
+    (setf *runs*
+          (github-matrix/run::get-last-run *workflow*)))
+  
+  (setf *root* (github-matrix/run-results::runs-to-boxes *workflow* :runs *runs*)))
 
 
 (defun fill-test-data ()

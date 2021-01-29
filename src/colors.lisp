@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/colors
+(mgl-pax-minimal:define-package #:github-matrix/colors
   (:use #:cl)
   (:export
    #:*tight-container-title-background*

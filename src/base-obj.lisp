@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/base-obj
+(mgl-pax-minimal:define-package #:github-matrix/base-obj
   (:use #:cl))
 (in-package github-matrix/base-obj)
 

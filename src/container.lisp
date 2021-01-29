@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/container
+(mgl-pax-minimal:define-package #:github-matrix/container
   (:use #:cl)
   (:import-from #:github-matrix/base-obj
                 #:obj-with-font
@@ -25,12 +25,22 @@
              :documentation "Alist with children.")))
 
 
+(defun make-container (title)
+  (make-instance 'container
+                 :title title))
+
+
 (defclass tight-container (container)
   ((title-box))
   (:default-initargs
    :margin 0
    :title-background *tight-container-title-background*
    :title-color *tight-container-title-color*))
+
+
+(defun make-tight-container (title)
+  (make-instance 'tight-container
+                 :title title))
 
 
 (defmethod print-object ((obj container) stream)
