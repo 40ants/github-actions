@@ -2,6 +2,7 @@
   (:use #:cl)
   (:import-from #:clack)
   (:import-from #:woo)
+  (:import-from #:alexandria)
   (:import-from #:log4cl-extras/error)
   (:import-from #:log4cl-extras/config)
   (:import-from #:rutils
@@ -22,6 +23,10 @@
 
 
 (defvar *server* nil)
+
+(defvar *debug* nil)
+
+(defvar *last-env* nil)
 
 
 (defun extract-user-and-project (uri)
@@ -61,10 +66,18 @@
 
 
 (defun process-request (env)
+  
   (destructuring-bind (&key request-uri &allow-other-keys)
       env
     (log4cl-extras/context:with-fields (:uri request-uri)
       (log:info "Processing request")
+      
+      (when (and *debug*
+                 (not (string= request-uri
+                               "/debug")))
+        (setf *last-env*
+              env))
+      
       (log4cl-extras/error:with-log-unhandled ()
         (cond
           ((string= "/" request-uri)
@@ -72,6 +85,15 @@
                  '(:content-type "text/plain"
                    :location "https://github.com/40ants/github-matrix")
                  (list "")))
+          ((and (string= "/debug" request-uri)
+                *debug*)
+           (list 200
+                 '(:content-type "text/plain")
+                 (list (fmt "Last env:~%~A~2&Headers:~%~S"
+                            *last-env*
+                            (alexandria:hash-table-alist
+                             (getf *last-env*
+                                   :headers))))))
           ((extract-user-and-project request-uri)
            (list 200
                  '(:content-type "image/svg")
@@ -112,6 +134,6 @@
 (defun cl-user::initialize-application (&key (port 8080))
   (setup-logging-for-prod)
   
-  (start port))
+  (start port :debug (uiop:getenv "DEBUG")))
 
 
