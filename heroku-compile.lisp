@@ -24,4 +24,4 @@
 
   (qlot:with-local-quicklisp (qlfile)
     (push "./" asdf:*central-registry*)
-    (ql:quickload "github-matrix")))
+    (ql:quickload "github-matrix/app")))

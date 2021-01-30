@@ -3,6 +3,7 @@
   (:import-from #:clack)
   (:import-from #:woo)
   (:import-from #:log4cl-extras/error)
+  (:import-from #:log4cl-extras/config)
   (:import-from #:rutils
                 #:fmt)
   (:import-from #:cl-ppcre
