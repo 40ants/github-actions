@@ -5,7 +5,7 @@
 (format t "*load-truename*: ~S~%"
         *load-truename*)
 
-(let* ((raw-qlfile (uiop:merge-pathnames* (make-pathname "qlfile")
+(let* ((raw-qlfile (uiop:merge-pathnames* #P"qlfile"
                                           (uiop:pathname-directory-pathname
                                            *load-truename*)))
        (qlfile (probe-file raw-qlfile)))
