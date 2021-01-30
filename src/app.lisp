@@ -9,6 +9,10 @@
                 #:register-groups-bind)
   (:import-from #:function-cache
                 #:defcached)
+  (:import-from #:github-matrix/repo)
+  (:import-from #:github-matrix/workflow)
+  (:import-from #:github-matrix/run-results)
+  (:import-from #:github-matrix/base-obj)
   (:export
    #:stop
    #:start

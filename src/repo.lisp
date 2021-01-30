@@ -2,7 +2,8 @@
   (:use #:cl)
   (:import-from #:rutils
                 #:fmt)
-  (:import-from #:dexador))
+  (:import-from #:dexador)
+  (:import-from #:github))
 (in-package github-matrix/repo)
 
 
