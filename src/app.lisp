@@ -3,6 +3,7 @@
   (:import-from #:clack)
   (:import-from #:str)
   (:import-from #:woo)
+  (:import-from #:spinneret)
   (:import-from #:alexandria)
   (:import-from #:log4cl-extras/error)
   (:import-from #:log4cl-extras/config)
