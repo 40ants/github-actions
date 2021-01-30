@@ -1,6 +1,7 @@
 (defpackage #:github-matrix/app
   (:use #:cl)
   (:import-from #:clack)
+  (:import-from #:str)
   (:import-from #:woo)
   (:import-from #:alexandria)
   (:import-from #:log4cl-extras/error)
@@ -28,6 +29,8 @@
 
 (defvar *last-env* nil)
 
+(defvar *last-document* nil)
+
 
 (defun extract-user-and-project (uri)
   (register-groups-bind (user project)
@@ -45,7 +48,15 @@
            (workflow (first (github-matrix/workflow::get-workflows repo)))
            (document (github-matrix/run-results::runs-to-boxes workflow)))
 
-      (let ((svg (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel)))
+      (when *debug*
+        (setf *last-document*
+              document))
+
+      (let* ((width (github-matrix/base-obj::width document))
+             (height (github-matrix/base-obj::height document))
+             (svg (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
+                                            :width width
+                                            :height height)))
         (github-matrix/base-obj::draw document svg)
         (with-output-to-string (s)
           (cl-svg:stream-out s svg))))))
@@ -66,8 +77,10 @@
 
 
 (defun process-request (env)
-  
-  (destructuring-bind (&key request-uri &allow-other-keys)
+  (destructuring-bind (&key
+                         request-uri
+                         headers
+                       &allow-other-keys)
       env
     (log4cl-extras/context:with-fields (:uri request-uri)
       (log:info "Processing request")
@@ -89,14 +102,33 @@
                 *debug*)
            (list 200
                  '(:content-type "text/plain")
-                 (list (fmt "Last env:~%~A~2&Headers:~%~S"
+                 (list (fmt "Last env:~%~S~2&Headers:~%~S"
                             *last-env*
                             (alexandria:hash-table-alist
                              (getf *last-env*
                                    :headers))))))
-          ((extract-user-and-project request-uri)
+          ((str:starts-with-p "/debug/"
+                              request-uri)
+           (let* ((host (when headers
+                          (gethash "host" headers)))
+                  (uri
+                    (subseq request-uri
+                            (1- (length "/debug/"))))
+                  (full-url (fmt "https://~A~A"
+                                 host
+                                 uri)))
+             (list 200
+                   '(:content-type "text/html")
+                   (list (spinneret:with-html-string
+                           (:h1 "Example of rendering")
+                           (:p (:raw (fmt "Use <a href=\"~A\">~A</a> and we'll render:"
+                                          full-url
+                                          full-url)))
+                           (:p (:img :src uri)))))))
+          ((extract-user-and-project
+            request-uri)
            (list 200
-                 '(:content-type "image/svg")
+                 '(:content-type "image/svg+xml;charset=utf-8")
                  (list (make-svg-response request-uri))))
           (t
            (list 404
