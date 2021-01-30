@@ -1,5 +1,6 @@
 (mgl-pax-minimal:define-package #:github-matrix/workflow
   (:use #:cl)
+  (:import-from #:github)
   (:import-from #:github-matrix/repo)
   (:import-from #:rutils
                 #:fmt))

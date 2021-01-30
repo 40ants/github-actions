@@ -1,0 +1,16 @@
+("quicklisp" .
+ (:class qlot/source/dist:source-dist
+  :initargs (:distribution "http://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
+  :version "2021-01-24"))
+("ultralisp" .
+ (:class qlot/source/dist:source-dist
+  :initargs (:distribution "http://dist.ultralisp.org/" :%version :latest)
+  :version "20210130103500"))
+("mgl-pax" .
+ (:class qlot/source/github:source-github
+  :initargs (:repos "svetlyak40wt/mgl-pax" :ref nil :branch "mgl-pax-minimal" :tag nil)
+  :version "github-2f6872f09c8c516e96f4bc5e14ca020b"))
+("anafanafo" .
+ (:class qlot/source/github:source-github
+  :initargs (:repos "40ants/cl-anafanafo" :ref nil :branch nil :tag nil)
+  :version "github-00385dcd97871a8d2f3907f75091ff3f"))

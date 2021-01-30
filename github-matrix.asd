@@ -8,3 +8,4 @@
   :depends-on ("github-matrix/playground")
   :description "A server to render SVG representation of Github Action's results."
   :in-order-to ((test-op (test-op github-matrix-test))))
+

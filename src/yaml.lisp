@@ -1,5 +1,6 @@
 (mgl-pax-minimal:define-package #:github-matrix/yaml
-  (:use #:cl))
+  (:use #:cl)
+  (:import-from #:cl-yaml))
 (in-package github-matrix/yaml)
 
 
