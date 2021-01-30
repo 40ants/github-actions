@@ -2,11 +2,12 @@
 
 (ql:quickload :qlot)
 
-(format t "*load-truename*: ~A~%"
+(format t "*load-truename*: ~S~%"
         *load-truename*)
 
-(let* ((raw-qlfile (uiop:merge-pathnames* "qlfile"
-                                          *load-truename*))
+(let* ((raw-qlfile (uiop:merge-pathnames* (make-pathname "qlfile")
+                                          (uiop:pathname-directory-pathname
+                                           *load-truename*)))
        (qlfile (probe-file raw-qlfile)))
   
   (format t "qlfile: ~S~%"
