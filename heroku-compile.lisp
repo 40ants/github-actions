@@ -2,13 +2,19 @@
 
 (ql:quickload :qlot)
 
-(format t "*load-pathname*: ~A~%"
-        *load-pathname*)
 (format t "*load-truename*: ~A~%"
         *load-truename*)
 
-(let ((qlfile (probe-file (uiop:merge-pathnames* "qlfile"
-                                                 *load-truename*))))
+(let* ((raw-qlfile (uiop:merge-pathnames* "qlfile"
+                                          *load-truename*))
+       (qlfile (probe-file raw-qlfile)))
+  
+  (format t "qlfile: ~S~%"
+          raw-qlfile)
+
+  (unless qlfile
+    (format t "qlfile not found!~%"))
+  
   (qlot/install:install-qlfile qlfile)
 
   ;; Theoreticall, this should work instead of the next form.
