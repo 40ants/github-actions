@@ -77,10 +77,11 @@
              (footer-font-family "Helvetica")
              (footer-font-weight "bold")
              (footer-font-size 8)
-             (footer-height footer-font-size)
+             (footer-height (* footer-font-size
+                               2))
              (font-data (anafanafo:load-data :family footer-font-family
                                              :weight footer-font-weight
-                                             :size footer-height))
+                                             :size footer-font-size))
              (footer-width (anafanafo:string-width font-data
                                                    footer-text))
              (height (+ (github-matrix/base-obj::height document)
@@ -94,7 +95,7 @@
             (cl-svg:link svg (:xlink-href "https://github-actions.40ants.com/"))
             footer-text
           :x (- width footer-width)
-          :y (- height footer-height)
+          :y (- height footer-font-size)
           :font-family footer-font-family
           :font-weight footer-font-weight
           :font-size footer-font-size

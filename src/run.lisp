@@ -34,31 +34,32 @@
 
 
 (defun get-last-run (workflow)
-  (let* ((repo (github-matrix/workflow::repo workflow))
-         (workflow-id (github-matrix/workflow::id workflow))
-         (user (github-matrix/repo::user repo))
-         (project (github-matrix/repo::project repo))
-         (branch (github-matrix/repo::branch repo))
-         (url (fmt "/repos/~A/~A/actions/workflows/~A/runs"
-                   user
-                   project
-                   workflow-id))
-         (response (github:get url
-                               :params (list (cons "branch"
-                                                   branch))
-                               :limit 1))
-         (all-runs (getf response :|workflow_runs|))
-         (data (first all-runs)))
+  (when workflow
+    (let* ((repo (github-matrix/workflow::repo workflow))
+           (workflow-id (github-matrix/workflow::id workflow))
+           (user (github-matrix/repo::user repo))
+           (project (github-matrix/repo::project repo))
+           (branch (github-matrix/repo::branch repo))
+           (url (fmt "/repos/~A/~A/actions/workflows/~A/runs"
+                     user
+                     project
+                     workflow-id))
+           (response (github:get url
+                                 :params (list (cons "branch"
+                                                     branch))
+                                 :limit 1))
+           (all-runs (getf response :|workflow_runs|))
+           (data (first all-runs)))
 
-    (when data
-      (let* ((check-suite-id (getf data :|check_suite_id|))
-             (url (fmt "/repos/~A/~A/check-suites/~A/check-runs"
-                       user
-                       project
-                       check-suite-id))
-             (response (github:get url))
-             (runs-data (getf response :|check_runs|)))
-        (loop for item in runs-data
-              collect (make-run (getf item :|name|)
-                                (getf item :|status|)
-                                (getf item :|conclusion|)))))))
+      (when data
+        (let* ((check-suite-id (getf data :|check_suite_id|))
+               (url (fmt "/repos/~A/~A/check-suites/~A/check-runs"
+                         user
+                         project
+                         check-suite-id))
+               (response (github:get url))
+               (runs-data (getf response :|check_runs|)))
+          (loop for item in runs-data
+                collect (make-run (getf item :|name|)
+                                  (getf item :|status|)
+                                  (getf item :|conclusion|))))))))

@@ -133,7 +133,4 @@
 </a>"
                      url
                      badge-url))))
-             (t (:p "ERROR: Unable to parse URL"))))))
-
-      ;; Footer
-      ))))
+             (t (:p "ERROR: Unable to parse URL"))))))))))
