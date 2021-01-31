@@ -36,6 +36,7 @@
 
 ;; Response will be cached for 15 minutes
 (progn
+  (defvar *make-svg-response-cache* nil)
   (defparameter *cache-timeout* (* 15 60))
 
   (function-cache:clear-cache *make-svg-response-cache*))
