@@ -10,6 +10,7 @@
   (:import-from #:rutils
                 #:starts-with
                 #:fmt)
+  (:import-from #:github-matrix/slynk)
   (:import-from #:cl-ppcre
                 #:register-groups-bind)
   (:import-from #:function-cache
@@ -167,12 +168,31 @@
      :appenders ((this-console :layout :plain)))))
 
 
+;; We need this becase Dexador's thread pool is
+;; not threadsafe yet. You'll find more details in this issue:
+;; https://github.com/fukamachi/dexador/issues/88
+(defun dexador:make-connection-pool ()
+  (make-hash-table :test 'equal
+                   #+sbcl :synchronized #+sbcl t))
+
+
 (defun cl-user::initialize-application (&key (port 8080))
   (setup-logging-for-prod)
 
   (setf github:*token*
         (uiop:getenv "GITHUB_TOKEN"))
-  
-  (start port :debug (uiop:getenv "DEBUG")))
+
+  (let ((slynk-port (parse-integer (or (uiop:getenv "SLYNK_PORT")
+                                       "4005")))
+        (slynk-interface (or (uiop:getenv "SLYNK_INTERFACE")
+                             "127.0.0.1"))
+        (debug (when (uiop:getenv "DEBUG")
+                 t)))
+
+    (github-matrix/slynk:start slynk-interface
+                               slynk-port)
+    
+    (log:info "Starting HTTP server on" port "with" debug)
+    (start port :debug debug)))
 
 
