@@ -13,4 +13,4 @@
 ("anafanafo" .
  (:class qlot/source/github:source-github
   :initargs (:repos "40ants/cl-anafanafo" :ref nil :branch nil :tag nil)
-  :version "github-a976421a2bf266d3908767075e28fb99"))
+  :version "github-3ba3e2609885c8fea082f3ba73b92a25"))
