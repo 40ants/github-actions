@@ -34,6 +34,12 @@
 
 (defvar *last-document* nil)
 
+;; Response will be cached for 15 minutes
+(progn
+  (defparameter *cache-timeout* (* 15 60))
+
+  (function-cache:clear-cache *make-svg-response-cache*))
+
 
 (defun extract-user-and-project (uri)
   (register-groups-bind (user project)
@@ -42,8 +48,7 @@
 
 
 (defcached (make-svg-response
-            ;; Response will be cached for 5 minutes
-            :timeout (* 60 5))
+            :timeout *cache-timeout*)
     (uri)
   (destructuring-bind (user project)
       (extract-user-and-project uri)
@@ -131,7 +136,9 @@
           ((extract-user-and-project
             request-uri)
            (list 200
-                 '(:content-type "image/svg+xml;charset=utf-8")
+                 (list :content-type "image/svg+xml;charset=utf-8"
+                       :cache-control (fmt "max-age=~A"
+                                           *cache-timeout*))
                  (list (make-svg-response request-uri))))
           (t
            (list 404
