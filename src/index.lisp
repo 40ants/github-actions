@@ -67,6 +67,11 @@
       (:raw *metrika-code*)
       (:link :rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"))
      (:body
+      (:a :href "https://lisp-lang.org"
+          :style "display: block; position: absolute; right: 0; margin-top: -8px;"
+          (:img :src "https://40ants.com/img/made-with-lisp.svg"
+                :alt "Lisp Logo"
+                :width "70"))
       ;; Ribbon from:
       ;; https://github.com/simonwhitaker/github-fork-ribbon-css
       (:a :class "github-fork-ribbon"
@@ -95,7 +100,7 @@
 
        (when url
          (log:debug "Creating preview for" url)
-       
+
          (let ((badge-url (make-badge-url-from-github-url env url)))
            (:h2 "Preview")
            (cond
@@ -128,4 +133,7 @@
 </a>"
                      url
                      badge-url))))
-             (t (:p "ERROR: Unable to parse URL"))))))))))
+             (t (:p "ERROR: Unable to parse URL"))))))
+
+      ;; Footer
+      ))))
