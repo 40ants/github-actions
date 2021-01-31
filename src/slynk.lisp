@@ -4,6 +4,15 @@
   (:import-from #:log4cl)
   (:import-from #:global-vars
                 #:define-global-var)
+  ;; These modules are required because sources will not be available at runtime
+  ;; on Heroku:
+  (:import-from #:slynk/arglists)
+  (:import-from #:slynk/mrepl)
+  (:import-from #:slynk/fancy-inspector)
+  (:import-from #:slynk/package-fu)
+  (:import-from #:slynk/trace-dialog)
+  (:import-from #:slynk/stickers)
+  (:import-from #:slynk/indentation)
   (:export
    #:*connections*
    #:setup
