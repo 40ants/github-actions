@@ -16,6 +16,7 @@
   (:import-from #:function-cache
                 #:defcached)
   (:import-from #:github-matrix/repo)
+  (:import-from #:github-matrix/index)
   (:import-from #:github-matrix/workflow)
   (:import-from #:github-matrix/run-results)
   (:import-from #:github-matrix/base-obj)
@@ -104,67 +105,57 @@
           (cl-svg:stream-out s svg))))))
 
 
+(defun parse-params (query-string)
+  (when query-string
+    (loop for (key . value) in (quri:url-decode-params query-string)
+          appending (list (alexandria:make-keyword
+                           (string-upcase key))
+                          value))))
+
 (defun process-request (env)
   (destructuring-bind (&key
                          path-info
-                         headers
+                         query-string
                        &allow-other-keys)
       env
-    (log4cl-extras/context:with-fields (:uri path-info)
-      (log:info "Processing request")
-      
-      (when (and *debug*
-                 (not (starts-with "/debug"
-                                   path-info)))
-        (setf *last-env*
-              env))
-      
-      (log4cl-extras/error:with-log-unhandled ()
-        (cond
-          ((string= "/" path-info)
-           (list 302
-                 '(:content-type "text/plain"
-                   :location "https://github.com/40ants/github-matrix")
-                 (list "")))
-          ((and (string= "/debug" path-info)
-                *debug*)
-           (list 200
-                 '(:content-type "text/plain")
-                 (list (fmt "Last env:~%~S~2&Headers:~%~S"
-                            *last-env*
-                            (alexandria:hash-table-alist
-                             (getf *last-env*
-                                   :headers))))))
-          ((starts-with "/debug/"
-                        path-info)
-           (let* ((host (when headers
-                          (gethash "host" headers)))
-                  (uri
-                    (subseq path-info
-                            (1- (length "/debug/"))))
-                  (full-url (fmt "https://~A~A"
-                                 host
-                                 uri)))
+    (let ((params (parse-params query-string)))
+      (log4cl-extras/context:with-fields (:uri path-info
+                                          :params params)
+        (log:info "Processing request")
+       
+        (when (and *debug*
+                   (not (starts-with "/debug"
+                                     path-info)))
+          (setf *last-env*
+                env))
+       
+        (log4cl-extras/error:with-log-unhandled ()
+          (cond
+            ((string= "/" path-info)
              (list 200
                    '(:content-type "text/html")
-                   (list (spinneret:with-html-string
-                           (:h1 "Example of rendering")
-                           (:p (:raw (fmt "Use <a href=\"~A\">~A</a> and we'll render:"
-                                          full-url
-                                          full-url)))
-                           (:p (:img :src uri)))))))
-          ((extract-user-and-project
-            path-info)
-           (list 200
-                 (list :content-type "image/svg+xml;charset=utf-8"
-                       :cache-control (fmt "max-age=~A"
-                                           *cache-timeout*))
-                 (list (make-svg-response path-info))))
-          (t
-           (list 404
-                 '(:content-type "text/plain")
-                 (list (fmt "Path \"~A\" not supported."
-                            path-info)))))))))
+                   (list (apply 'github-matrix/index:render env params))))
+            ((and (string= "/debug" path-info)
+                  *debug*)
+             (list 200
+                   '(:content-type "text/plain")
+                   (list (fmt "Last env:~%~S~2&Headers:~%~S"
+                              *last-env*
+                              (alexandria:hash-table-alist
+                               (getf *last-env*
+                                     :headers))))))
+            ((extract-user-and-project
+              path-info)
+             (list 200
+                   (list :content-type "image/svg+xml;charset=utf-8"
+                         :cache-control (fmt "max-age=~A"
+                                             *cache-timeout*))
+                   (list (make-svg-response path-info))))
+            (t
+             (list 404
+                   '(:content-type "text/plain")
+                   (list (fmt "Path \"~A\" not supported."
+                              path-info))))))))))
 
 
 (defun start (port &key (debug nil))
