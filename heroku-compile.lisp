@@ -24,4 +24,15 @@
 
   (qlot:with-local-quicklisp (qlfile)
     (push "./" asdf:*central-registry*)
-    (ql:quickload "github-matrix/app")))
+    (ql:quickload "github-matrix/app")
+
+    ;; These modules are required because sources will not be available at runtime
+    ;; on Heroku and SLYNK will die tryng to do asdf:load-system unless we preload
+    ;; these systems into the Lisp image
+    (ql:quickload '(:slynk/arglists
+                    :slynk/mrepl
+                    :slynk/fancy-inspector
+                    :slynk/package-fu
+                    :slynk/trace-dialog
+                    :slynk/stickers
+                    :slynk/indentation))))
