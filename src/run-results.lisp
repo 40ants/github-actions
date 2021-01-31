@@ -75,11 +75,12 @@
             for status = (github-matrix/run::status run)
             for conclusion = (github-matrix/run::conclusion run)
             for box-type = (case status
-                             (:in_progress 'in-progress-box)
-                             (t
+                             (:completed
                               (case conclusion
                                 (:success 'success-box)
-                                (t 'fail-box))))
+                                (t 'fail-box)))
+                             (t
+                              'in-progress-box))
             for chain = (parse-run-name matrix
                                         run)
             do (add-box-to root chain

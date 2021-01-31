@@ -35,6 +35,8 @@
 
 (defvar *last-document* nil)
 
+(defvar *last-runs* nil)
+
 ;; Response will be cached for 15 minutes
 (progn
   (defvar *make-svg-response-cache* nil)
@@ -59,9 +61,13 @@
       (extract-user-and-project uri)
     (let* ((repo (github-matrix/repo::make-repo user project))
            (workflow (first (github-matrix/workflow::get-workflows repo)))
-           (document (github-matrix/run-results::runs-to-boxes workflow)))
-
+           (runs (github-matrix/run::get-last-run workflow))
+           (document (github-matrix/run-results::runs-to-boxes workflow
+                                                               :runs runs)))
       (when *debug*
+        (setf *last-runs*
+              runs)
+
         (setf *last-document*
               document))
 
