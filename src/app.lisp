@@ -5,6 +5,7 @@
   (:import-from #:woo)
   (:import-from #:spinneret)
   (:import-from #:alexandria)
+  (:import-from #:github)
   (:import-from #:log4cl-extras/error)
   (:import-from #:log4cl-extras/config)
   (:import-from #:rutils
@@ -166,6 +167,9 @@
 
 (defun cl-user::initialize-application (&key (port 8080))
   (setup-logging-for-prod)
+
+  (setf github:*token*
+        (uiop:getenv "GITHUB_TOKEN"))
   
   (start port :debug (uiop:getenv "DEBUG")))
 
