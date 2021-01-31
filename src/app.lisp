@@ -98,20 +98,6 @@
           (cl-svg:stream-out s svg))))))
 
 
-(defun retrieve-data (&key dont-fetch-runs)
-  (setf *repo*
-        (github-matrix/repo::make-repo "40ants" "cl-info" :branch "master"))
-
-  (setf *workflow*
-        (first (github-matrix/workflow::get-workflows *repo*)))
-
-  (unless dont-fetch-runs
-    (setf *runs*
-          (github-matrix/run::get-last-run *workflow*)))
-  
-  (setf *root* (github-matrix/run-results::runs-to-boxes *workflow* :runs *runs*)))
-
-
 (defun process-request (env)
   (destructuring-bind (&key
                          path-info
