@@ -1,7 +1,6 @@
 (defpackage #:github-matrix/app
   (:use #:cl)
   (:import-from #:clack)
-  (:import-from #:str)
   (:import-from #:woo)
   (:import-from #:spinneret)
   (:import-from #:alexandria)
@@ -9,6 +8,7 @@
   (:import-from #:log4cl-extras/error)
   (:import-from #:log4cl-extras/config)
   (:import-from #:rutils
+                #:starts-with
                 #:fmt)
   (:import-from #:cl-ppcre
                 #:register-groups-bind)
@@ -88,8 +88,8 @@
       (log:info "Processing request")
       
       (when (and *debug*
-                 (not (string= request-uri
-                               "/debug")))
+                 (not (starts-with "/debug"
+                                   request-uri)))
         (setf *last-env*
               env))
       
@@ -109,8 +109,8 @@
                             (alexandria:hash-table-alist
                              (getf *last-env*
                                    :headers))))))
-          ((str:starts-with-p "/debug/"
-                              request-uri)
+          ((starts-with "/debug/"
+                        request-uri)
            (let* ((host (when headers
                           (gethash "host" headers)))
                   (uri
