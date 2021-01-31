@@ -1,10 +1,50 @@
 (mgl-pax-minimal:define-package #:github-matrix/svg
   (:use #:cl)
   (:import-from #:cl-svg)
-  (:import-from #:anafanafo)
+  (:import-from #:anafanafo
+                #:string-width)
   (:export
-   #:draw-box-with-text))
+   #:draw-box-with-text
+   #:text))
 (in-package github-matrix/svg)
+
+
+(defun text (parent
+             text &key
+                    x y
+                    (color "black")
+                    (font-family "Helvetica")
+                    (font-weight "bold")
+                    (font-size 16)
+                    (shadow t)
+                    (shadow-opacity 0.4))
+  (let* ((font-data (anafanafo:load-data :family font-family
+                                         :weight font-weight
+                                         :size font-size))
+         (text-width (string-width font-data text))
+         (shadow-offset (/ font-size 12))
+         (group (cl-svg:make-group parent ())))
+    (when shadow
+      (cl-svg:text group
+          (:x (+ x shadow-offset)
+           :y (+ y shadow-offset)
+           :font-family font-family
+           :font-weight font-weight
+           :font-size font-size
+           :fill "#010101"
+           :fill-opacity shadow-opacity
+           :text-length text-width)
+        text))
+    ;; The text
+    (cl-svg:text group
+        (:x x
+         :y y
+         :font-family font-family
+         :font-weight font-weight
+         :font-size font-size
+         :fill color
+         :text-length text-width)
+      text)))
 
 
 (defun draw-box-with-text (svg text &key
@@ -32,27 +72,13 @@
                        0))
         :fill background)
 
-    (when shadow
-      (cl-svg:text group
-          (:x (1+ margin)
-           :y (1+ (+ font-size
-                      (/ margin 2)))
-           :font-family font-family
-           :font-weight font-weight
-           :font-size font-size
-           :fill "#010101"
-           :fill-opacity 0.5
-           :text-length text-width)
-        text))
-    ;; The text
-    (cl-svg:text group
-        (:x margin
-         :y (+ font-size
-                (/ margin 2))
-         :font-family font-family
-         :font-weight font-weight
-         :font-size font-size
-         :fill color
-         :text-length text-width)
-      text)
+    (text group text
+      :x margin
+      :y (+ font-size
+             (/ margin 2))
+      :font-family font-family
+      :font-weight font-weight
+      :font-size font-size
+      :color color
+      :shadow shadow)
     (values group)))

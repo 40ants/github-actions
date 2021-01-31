@@ -19,6 +19,7 @@
   (:import-from #:github-matrix/workflow)
   (:import-from #:github-matrix/run-results)
   (:import-from #:github-matrix/base-obj)
+  (:import-from #:github-matrix/svg)
   (:export
    #:stop
    #:start
@@ -37,9 +38,12 @@
 ;; Response will be cached for 15 minutes
 (progn
   (defvar *make-svg-response-cache* nil)
-  (defparameter *cache-timeout* (* 15 60))
+  (defparameter *cache-timeout* (* 1 ;; 15 60
+                                   ))
 
-  (function-cache:clear-cache *make-svg-response-cache*))
+  (function-cache:clear-cache *make-svg-response-cache*)
+  (setf (function-cache:timeout *make-svg-response-cache*)
+        *cache-timeout*))
 
 
 (defun extract-user-and-project (uri)
@@ -62,11 +66,34 @@
               document))
 
       (let* ((width (github-matrix/base-obj::width document))
-             (height (github-matrix/base-obj::height document))
+             (footer-text "Rendered by github-actions.40ants.com")
+             (footer-font-family "Helvetica")
+             (footer-font-weight "bold")
+             (footer-font-size 8)
+             (footer-height footer-font-size)
+             (font-data (anafanafo:load-data :family footer-font-family
+                                             :weight footer-font-weight
+                                             :size footer-height))
+             (footer-width (anafanafo:string-width font-data
+                                                   footer-text))
+             (height (+ (github-matrix/base-obj::height document)
+                         footer-height))
              (svg (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                             :width width
                                             :height height)))
         (github-matrix/base-obj::draw document svg)
+        
+        (github-matrix/svg:text
+            (cl-svg:link svg (:xlink-href "https://github-actions.40ants.com/"))
+            footer-text
+          :x (- width footer-width)
+          :y (- height footer-height)
+          :font-family footer-font-family
+          :font-weight footer-font-weight
+          :font-size footer-font-size
+          :color github-matrix/colors:*link-color*
+          :shadow-opacity 0.2)
+        
         (with-output-to-string (s)
           (cl-svg:stream-out s svg))))))
 

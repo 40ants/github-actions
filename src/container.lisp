@@ -13,8 +13,13 @@
                 #:*tight-container-title-background*
                 #:*tight-container-title-color*)
   (:import-from #:github-matrix/svg
-                #:draw-box-with-text))
+                #:draw-box-with-text)
+  (:import-from #:alexandria
+                #:hash-table-values))
 (in-package github-matrix/container)
+
+
+(defvar *debug-sizes* nil)
 
 
 (defclass container (obj-with-font)
@@ -126,16 +131,30 @@
 (defmethod height ((obj container))
   (with-slots (children font-size margin)
       obj
-    (+ (ecase (orientation obj)
-         (:row
-          (+ (* margin 2)
-              (loop for child being the hash-value of children
-                    maximizing (height child))))
-         (:column
-          (+ (* margin (1+ (hash-table-count children)))
-              (loop for child being the hash-value of children
-                    summing (height child)))))
-        (header-height obj))))
+    (let ((children (hash-table-values children)))
+      (+ (ecase (orientation obj)
+           (:row
+            (+ (* margin 2)
+                (loop for child in children
+                      maximizing (height child))))
+           (:column
+            (+ (* margin (1+ (length children)))
+                (loop for child in children
+                      summing (height child)))))
+          (cond
+            ;; If there is only one child and it is not a tight,
+            ;; then there is no reason
+            ;; to render outer container
+            ((and (= (length children)
+                     1)
+                  (not (typep (first children)
+                              'tight-container)))
+             0)
+            ;; Otherwise, draw them all!
+            (t
+             ;; We draw header only if there is more than one
+             ;; child in the box:
+             (header-height obj)))))))
 
 
 (defmethod width ((obj tight-container))
@@ -175,16 +194,17 @@
   (with-slots (children font-family font-weight font-size margin title) obj
     (let* ((group (cl-svg:make-group svg ()))
            (full-width (width obj))
+           (full-height (height obj))
            (font-data (anafanafo:load-data :family font-family
                                            :weight font-weight
                                            :size font-size))
            (text-width (anafanafo:string-width font-data title)))
-
-      ;; DEBUG frame
-      ;; (cl-svg:draw group
-      ;;     (:rect :x 0 :y 0 :width full-width :height full-height)
-      ;;     :stroke "#FFAA66"
-      ;;     :fill "white")
+      
+      (when *debug-sizes*
+        (cl-svg:draw group
+            (:rect :x 0 :y 0 :width full-width :height full-height)
+            :stroke "#FFAA66"
+            :fill "white"))
 
       (let* ((max-title-width (- full-width
                                   (* margin 2)))
@@ -257,6 +277,14 @@
   ;; Tight container always drawn as a row.
   (with-slots (children font-family font-weight font-size margin title-box) obj
     (let* ((group (cl-svg:make-group svg ())))
+
+      (when *debug-sizes*
+       (let ((full-width (width obj))
+             (full-height (height obj)))
+         (cl-svg:draw group
+             (:rect :x 0 :y 0 :width full-width :height full-height)
+             :stroke "#FF2266"
+             :fill "white")))
       
       (draw title-box group)
 
