@@ -84,9 +84,6 @@
                :style "display: inline-block; position: relative; top: 0.2em;"
                (:img :width "160"
                      :src "https://40ants.com/lisp-project-of-the-day/media/images/patreon-btn.png")))
-      ;; (:h2 "Support it "
-      ;;      (:a :href "https://www.patreon.com/40ants"
-      ;;          "at Patreon!"))
       (:p "Enter the URL of a project to render it's action's matrix:")
       (:div
        (:form :method :get
