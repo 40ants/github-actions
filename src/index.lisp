@@ -62,11 +62,26 @@
   (spinneret:with-html-string
     (:html
      (:head
-      (:title "Github Actions Matrix Badge")
+      (:title "Github Actions Matrix Badger!")
       (:raw *analytics-code*)
-      (:raw *metrika-code*))
+      (:raw *metrika-code*)
+      (:link :rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"))
      (:body
-      (:h1 "Github Actions")
+      ;; Ribbon from:
+      ;; https://github.com/simonwhitaker/github-fork-ribbon-css
+      (:a :class "github-fork-ribbon"
+          :href "https://github.com/40ants/github-matrix"
+          :data-ribbon "Fork me on GitHub"
+          :title "Fork me on GitHub"
+          "Fork me on GitHub")
+      (:h1 "Github Actions Matrix Badger!"
+           (:a :href "https://www.patreon.com/40ants"
+               :style "display: inline-block; position: relative; top: 0.2em;"
+               (:img :width "160"
+                     :src "https://40ants.com/lisp-project-of-the-day/media/images/patreon-btn.png")))
+      ;; (:h2 "Support it "
+      ;;      (:a :href "https://www.patreon.com/40ants"
+      ;;          "at Patreon!"))
       (:p "Enter the URL of a project to render it's action's matrix:")
       (:div
        (:form :method :get
