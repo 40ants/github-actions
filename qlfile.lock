@@ -5,7 +5,7 @@
 ("ultralisp" .
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "http://dist.ultralisp.org/" :%version :latest)
-  :version "20210130195500"))
+  :version "20210131112000"))
 ("mgl-pax" .
  (:class qlot/source/github:source-github
   :initargs (:repos "svetlyak40wt/mgl-pax" :ref nil :branch "mgl-pax-minimal" :tag nil)
@@ -14,3 +14,7 @@
  (:class qlot/source/github:source-github
   :initargs (:repos "40ants/cl-anafanafo" :ref nil :branch nil :tag nil)
   :version "github-3ba3e2609885c8fea082f3ba73b92a25"))
+("cl-yandex-metrika" .
+ (:class qlot/source/github:source-github
+  :initargs (:repos "40ants/cl-yandex-metrika" :ref nil :branch nil :tag nil)
+  :version "github-a31974c4a7d84bc47446cb8941966728"))

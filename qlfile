@@ -2,3 +2,4 @@ dist ultralisp http://dist.ultralisp.org/
 
 github mgl-pax svetlyak40wt/mgl-pax :branch mgl-pax-minimal
 github anafanafo 40ants/cl-anafanafo
+github cl-yandex-metrika 40ants/cl-yandex-metrika

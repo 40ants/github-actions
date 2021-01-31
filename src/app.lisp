@@ -16,6 +16,7 @@
   (:import-from #:function-cache
                 #:defcached)
   (:import-from #:github-matrix/repo)
+  (:import-from #:github-matrix/metrika)
   (:import-from #:github-matrix/index)
   (:import-from #:github-matrix/workflow)
   (:import-from #:github-matrix/run-results)
@@ -147,6 +148,9 @@
                                      :headers))))))
             ((extract-user-and-project
               path-info)
+             ;; Register the hit in the Analytics
+             (github-matrix/metrika:hit path-info)
+             ;; Return SVG in response
              (list 200
                    (list :content-type "image/svg+xml;charset=utf-8"
                          :cache-control (fmt "max-age=~A"
