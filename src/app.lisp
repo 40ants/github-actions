@@ -114,27 +114,27 @@
 
 (defun process-request (env)
   (destructuring-bind (&key
-                         request-uri
+                         path-info
                          headers
                        &allow-other-keys)
       env
-    (log4cl-extras/context:with-fields (:uri request-uri)
+    (log4cl-extras/context:with-fields (:uri path-info)
       (log:info "Processing request")
       
       (when (and *debug*
                  (not (starts-with "/debug"
-                                   request-uri)))
+                                   path-info)))
         (setf *last-env*
               env))
       
       (log4cl-extras/error:with-log-unhandled ()
         (cond
-          ((string= "/" request-uri)
+          ((string= "/" path-info)
            (list 302
                  '(:content-type "text/plain"
                    :location "https://github.com/40ants/github-matrix")
                  (list "")))
-          ((and (string= "/debug" request-uri)
+          ((and (string= "/debug" path-info)
                 *debug*)
            (list 200
                  '(:content-type "text/plain")
@@ -144,11 +144,11 @@
                              (getf *last-env*
                                    :headers))))))
           ((starts-with "/debug/"
-                        request-uri)
+                        path-info)
            (let* ((host (when headers
                           (gethash "host" headers)))
                   (uri
-                    (subseq request-uri
+                    (subseq path-info
                             (1- (length "/debug/"))))
                   (full-url (fmt "https://~A~A"
                                  host
@@ -162,17 +162,17 @@
                                           full-url)))
                            (:p (:img :src uri)))))))
           ((extract-user-and-project
-            request-uri)
+            path-info)
            (list 200
                  (list :content-type "image/svg+xml;charset=utf-8"
                        :cache-control (fmt "max-age=~A"
                                            *cache-timeout*))
-                 (list (make-svg-response request-uri))))
+                 (list (make-svg-response path-info))))
           (t
            (list 404
                  '(:content-type "text/plain")
                  (list (fmt "Path \"~A\" not supported."
-                            request-uri)))))))))
+                            path-info)))))))))
 
 
 (defun start (port &key (debug nil))
