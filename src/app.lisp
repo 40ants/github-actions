@@ -38,12 +38,12 @@
 ;; Response will be cached for 15 minutes
 (progn
   (defvar *make-svg-response-cache* nil)
-  (defparameter *cache-timeout* (* 1 ;; 15 60
-                                   ))
-
-  (function-cache:clear-cache *make-svg-response-cache*)
-  (setf (function-cache:timeout *make-svg-response-cache*)
-        *cache-timeout*))
+  (defparameter *cache-timeout* (* 15 60))
+  
+  (when *make-svg-response-cache*
+    (function-cache:clear-cache *make-svg-response-cache*)
+    (setf (function-cache:timeout *make-svg-response-cache*)
+          *cache-timeout*)))
 
 
 (defun extract-user-and-project (uri)
