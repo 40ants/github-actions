@@ -12,7 +12,7 @@
 (in-package github-matrix/index)
 
 
-(defvar *demo-urls*
+(defparameter *demo-urls*
   '("https://github.com/40ants/cl-info"
     "https://github.com/github/licensed"
     "https://github.com/signalapp/Signal-Desktop"
@@ -75,8 +75,10 @@
                                                     (random-demo-url)))
   (spinneret:with-html-string
     (:html
-     (:head
+     (:head 
       (:title "Github Actions Matrix Badger!")
+      (:meta :name "viewport"
+             :content "width=device-width, initial-scale=1.0")
       (:raw *analytics-code*)
       (:raw *metrika-code*)
       (:link :rel "stylesheet" :href "https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"))
