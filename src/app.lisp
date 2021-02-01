@@ -125,13 +125,13 @@
                                           :params params)
         (log:info "Processing request")
        
-        (when (and *debug*
-                   (not (starts-with "/debug"
-                                     path-info)))
-          (setf *last-env*
-                env))
-       
         (log4cl-extras/error:with-log-unhandled ()
+          (when (and *debug*
+                     (not (starts-with "/debug"
+                                       path-info)))
+            (setf *last-env*
+                  env))
+          
           (cond
             ((string= "/" path-info)
              (list 200
@@ -149,13 +149,18 @@
             ((extract-user-and-project
               path-info)
              ;; Register the hit in the Analytics
-             (github-matrix/metrika:hit path-info)
-             ;; Return SVG in response
-             (list 200
-                   (list :content-type "image/svg+xml;charset=utf-8"
-                         :cache-control (fmt "max-age=~A"
-                                             *cache-timeout*))
-                   (list (make-svg-response path-info))))
+             (destructuring-bind (&key demo &allow-other-keys)
+                 params
+               
+               (unless demo
+                 (github-matrix/metrika:hit path-info))
+               
+               ;; Return SVG in response
+               (list 200
+                     (list :content-type "image/svg+xml;charset=utf-8"
+                           :cache-control (fmt "max-age=~A"
+                                               *cache-timeout*))
+                     (list (make-svg-response path-info)))))
             (t
              (list 404
                    '(:content-type "text/plain")

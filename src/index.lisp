@@ -12,6 +12,10 @@
 (in-package github-matrix/index)
 
 
+(defvar *demo-url*
+  "https://github.com/40ants/cl-info")
+
+
 (defvar *analytics-code*
   "<!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src=\"https://www.googletagmanager.com/gtag/js?id=G-Z6GYGEXD6N\"></script>
@@ -90,19 +94,26 @@
               :action "/"
               (:input :type "text"
                       :name "url"
-                      :placeholder "https://github.com/40ants/cl-info"
+                      :placeholder *demo-url*
                       :style "width: 50%"
                       :value url)
               (:input :type "submit"))
 
-       (when url
+       (let (is-demo)
+         (unless url
+           (setf url *demo-url*)
+
+           (:div :style "z-index:1000; background-color: white; opacity: 0.5; position: absolute; width: 100%; height: 100%"))
+
          (log:debug "Creating preview for" url)
 
          (let ((badge-url (make-badge-url-from-github-url env url)))
            (:h2 "Preview")
            (cond
              (badge-url
-              (:p (:img :src badge-url))
+              (:p (:img :src (if is-demo
+                                 (fmt "~A?demo=1" badge-url)
+                                 badge-url)))
               (:h2 "Insert this code to README")
 
               (:h3 "Markdown")
