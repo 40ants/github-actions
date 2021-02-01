@@ -31,4 +31,6 @@
 
 
 (defun workflow-matrix (workflow)
-  (parse-matrix (github-matrix/workflow::workflow-content workflow)))
+  (let ((content (github-matrix/workflow::workflow-content workflow)))
+    (when content
+      (parse-matrix content))))

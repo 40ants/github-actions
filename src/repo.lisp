@@ -40,12 +40,16 @@
 
 
 (defun get-file (repo path)
-  (let ((url (fmt "https://raw.githubusercontent.com/~A/~A/~A/~A"
-                  (user repo)
-                  (project repo)
-                  (branch repo)
-                  path)))
-    (values (dex:get url))))
+  (handler-case
+      (let ((url (fmt "https://raw.githubusercontent.com/~A/~A/~A/~A"
+                      (user repo)
+                      (project repo)
+                      (branch repo)
+                      path)))
+        (values (dex:get url)))
+    (dexador.error:http-request-not-found (c)
+      (declare (ignore c))
+      nil)))
 
 
 (defun get-default-branch (repo)
