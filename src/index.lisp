@@ -12,8 +12,12 @@
 (in-package github-matrix/index)
 
 
-(defvar *demo-url*
-  "https://github.com/40ants/cl-info")
+(defvar *demo-urls*
+  '("https://github.com/40ants/cl-info"
+    "https://github.com/github/licensed"
+    "https://github.com/signalapp/Signal-Desktop"
+    "https://github.com/snowpackjs/snowpack"
+    "https://github.com/stephenmcd/mezzanine"))
 
 
 (defvar *analytics-code*
@@ -62,7 +66,13 @@
              project)))))
 
 
-(defun render (env &key url &allow-other-keys)
+(defun random-demo-url ()
+  (let ((idx (random (length *demo-urls*))))
+    (nth idx *demo-urls*)))
+
+
+(defun render (env &key url &allow-other-keys &aux (demo-url
+                                                    (random-demo-url)))
   (spinneret:with-html-string
     (:html
      (:head
@@ -94,14 +104,14 @@
               :action "/"
               (:input :type "text"
                       :name "url"
-                      :placeholder *demo-url*
+                      :placeholder demo-url
                       :style "width: 50%"
                       :value url)
               (:input :type "submit"))
 
        (let (is-demo)
          (unless url
-           (setf url *demo-url*)
+           (setf url demo-url)
 
            (:div :style "z-index:1000; background-color: white; opacity: 0.5; position: absolute; width: 100%; height: 100%"))
 
