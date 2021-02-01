@@ -113,42 +113,54 @@
          (unless url
            (setf url demo-url)
 
-           (:div :style "z-index:1000; background-color: white; opacity: 0.5; position: absolute; width: 100%; height: 100%"))
-
+           (:style ".preview {
+                      position: relative;}
+                    
+                    .preview:before {
+                        content: \"\";
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                        background: rgba(255, 255, 255, 0.5);}"))
+         
          (log:debug "Creating preview for" url)
 
          (let ((badge-url (make-badge-url-from-github-url env url)))
-           (:h2 "Preview")
-           (cond
-             (badge-url
-              (:p (:img :src (if is-demo
-                                 (fmt "~A?demo=1" badge-url)
-                                 badge-url)))
-              (:h2 "Insert this code to README")
+           (:div :class "preview"
+                 (:h2 "Preview")
+                 (cond
+                   (badge-url
+                    (:p (:img :src (if is-demo
+                                       (fmt "~A?demo=1" badge-url)
+                                       badge-url)))
+                    (:h2 "Insert this code to README")
 
-              (:h3 "Markdown")
-              (:code
-               (:pre
-                (fmt "[![](~A)](~A)"
-                     badge-url
-                     url)))
-              (:h3 "reStructured Text")
-              (:code
-               (:pre
-                (fmt "
+                    (:h3 "Markdown")
+                    (:code
+                     (:pre
+                      (fmt "[![](~A)](~A)"
+                           badge-url
+                           url)))
+                    (:h3 "reStructured Text")
+                    (:code
+                     (:pre
+                      (fmt "
 .. image:: ~A
     :target: ~A
 "
-                     badge-url
-                     url)))
+                           badge-url
+                           url)))
 
-              (:h3 "Raw HTML")
-              (:code
-               (:pre
-                (fmt "
+                    (:h3 "Raw HTML")
+                    (:code
+                     (:pre
+                      (fmt "
 <a href=\"~A\">
   <img src=\"~A\"/>
 </a>"
-                     url
-                     badge-url))))
-             (t (:p "ERROR: Unable to parse URL"))))))))))
+                           url
+                           badge-url))))
+                   (t (:p "ERROR: Unable to parse URL")))))))))))
