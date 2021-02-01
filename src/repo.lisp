@@ -49,6 +49,12 @@
         (values (dex:get url)))
     (dexador.error:http-request-not-found (c)
       (declare (ignore c))
+      nil)
+    ;; Sometimes workflow path can be just
+    ;; something like "Build Failed" :(
+    ;; found at https://github.com/facebook/watchman
+    (dexador.error:http-request-bad-request (c)
+      (declare (ignore c))
       nil)))
 
 
