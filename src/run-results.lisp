@@ -76,7 +76,8 @@
                        (add-box-to (github-matrix/container::child node (car names))
                                    (cdr names)
                                    :box-type box-type))))))
-         (loop with root = (github-matrix/container::make-container (github-matrix/workflow::name workflow))
+         (loop with root = (github-matrix/container::make-container (github-matrix/workflow::name workflow)
+                                                                    :comment (github-matrix/workflow::path workflow))
                for run in runs
                for run-name = (github-matrix/run::name run)
                for status = (github-matrix/run::status run)

@@ -24,15 +24,17 @@
 
 (defclass container (obj-with-font)
   ((title :initarg :title)
+   (comment :initarg :comment)
    (margin :initarg :margin
            :initform 5)
    (children :initform (make-hash-table :test 'equal)
              :documentation "Alist with children.")))
 
 
-(defun make-container (title)
+(defun make-container (title &key comment)
   (make-instance 'container
-                 :title title))
+                 :title title
+                 :comment comment))
 
 
 (defclass tight-container (container)
@@ -43,9 +45,10 @@
    :title-color *tight-container-title-color*))
 
 
-(defun make-tight-container (title)
+(defun make-tight-container (title &key comment)
   (make-instance 'tight-container
-                 :title title))
+                 :title title
+                 :comment comment))
 
 
 (defmethod print-object ((obj container) stream)
@@ -93,8 +96,7 @@
     (or (gethash name children)
         (setf (gethash name children)
               (or default
-                  (make-instance 'container
-                                 :title name))))))
+                  (make-container name))))))
 
 
 (defun orientation (container)
@@ -109,16 +111,27 @@
 
 
 (defmethod width ((obj container))
-  (with-slots (children margin) obj
-    (ecase (orientation obj)
-      (:row
-       (+ (loop for child being the hash-value of children
-                summing (width child))
-           (* margin
-              (1- (hash-table-count children)))))
-      (:column
-       (loop for child being the hash-value of children
-             maximizing (width child))))))
+  (with-slots (children margin font-family font-weight font-size title)
+      obj
+    (let ((children-width
+            (ecase (orientation obj)
+              (:row
+               (+ (loop for child being the hash-value of children
+                        summing (width child))
+                   (* margin
+                      (1- (hash-table-count children)))))
+              (:column
+               (loop for child being the hash-value of children
+                     maximizing (width child)))))
+          (title-width
+            (let* ((font-data (anafanafo:load-data :family font-family
+                                                   :weight font-weight
+                                                   :size font-size))
+                   (text-width (anafanafo:string-width font-data title)))
+              (+ text-width
+                  (* margin 2)))))
+      (max children-width
+           title-width))))
 
 
 (defmethod header-height ((obj container))
@@ -176,6 +189,7 @@
   (with-slots (children) obj
     (let* ((children (alexandria:hash-table-values children))
            (first-child (car children)))
+
       (cond
         ;; If there is only one child and it is not a tight,
         ;; then there is no reason
@@ -191,7 +205,7 @@
 
 
 (defmethod inner-draw ((obj container) svg)
-  (with-slots (children font-family font-weight font-size margin title) obj
+  (with-slots (children font-family font-weight font-size margin title comment) obj
     (let* ((group (cl-svg:make-group svg ()))
            (full-width (width obj))
            (full-height (height obj))
@@ -199,6 +213,12 @@
                                            :weight font-weight
                                            :size font-size))
            (text-width (anafanafo:string-width font-data title)))
+
+      (when comment
+        (cl-svg:comment group
+          (rutils:fmt "~A font-size: ~A"
+                      comment
+                      font-size)))
       
       (when *debug-sizes*
         (cl-svg:draw group
@@ -206,44 +226,35 @@
             :stroke "#FFAA66"
             :fill "white"))
 
-      (let* ((max-title-width (- full-width
-                                  (* margin 2)))
-             (scale
-               (if (> text-width
-                      max-title-width)
-                   (/ max-title-width
-                      text-width)
-                   1.0)))
-        (cl-svg:transform
-            ((cl-svg:translate (1+ margin)
-                               (1+ (+ margin
-                                       font-size)))
-             (cl-svg:scale scale))
-          (cl-svg:text group
-              (:x 0
-               :y 0
-               :font-family font-family
-               :font-weight font-weight
-               :font-size font-size
-               :fill "#ccc"
-               :fill-opacity 0.5
-               :text-length text-width)
-            title))
-       
-        (cl-svg:transform
-            ((cl-svg:translate margin
-                               (+ margin
-                                   font-size))
-             (cl-svg:scale scale))
-          (cl-svg:text group
-              (:x 0
-               :y 0
-               :font-family font-family
-               :font-weight font-weight
-               :font-size font-size
-               :fill "#555"
-               :text-length text-width)
-            title)))
+      ;; TODO: replace with svg/text
+      (cl-svg:transform
+          ((cl-svg:translate (1+ margin)
+                             (1+ (+ margin
+                                     font-size))))
+        (cl-svg:text group
+            (:x 0
+             :y 0
+             :font-family font-family
+             :font-weight font-weight
+             :font-size font-size
+             :fill "#ccc"
+             :fill-opacity 0.5
+             :text-length text-width)
+          title))
+      
+      (cl-svg:transform
+          ((cl-svg:translate margin
+                             (+ margin
+                                 font-size)))
+        (cl-svg:text group
+            (:x 0
+             :y 0
+             :font-family font-family
+             :font-weight font-weight
+             :font-size font-size
+             :fill "#555"
+             :text-length text-width)
+          title))
 
       (ecase (orientation obj)
         (:row
@@ -275,16 +286,22 @@
 
 (defmethod inner-draw ((obj tight-container) svg)
   ;; Tight container always drawn as a row.
-  (with-slots (children font-family font-weight font-size margin title-box) obj
+  (with-slots (children font-family font-weight font-size margin title-box comment) obj
     (let* ((group (cl-svg:make-group svg ())))
 
+      (when comment
+        (cl-svg:comment group
+          (rutils:fmt "~A font-size: ~A"
+                      comment
+                      font-size)))
+
       (when *debug-sizes*
-       (let ((full-width (width obj))
-             (full-height (height obj)))
-         (cl-svg:draw group
-             (:rect :x 0 :y 0 :width full-width :height full-height)
-             :stroke "#FF2266"
-             :fill "white")))
+        (let ((full-width (width obj))
+              (full-height (height obj)))
+          (cl-svg:draw group
+              (:rect :x 0 :y 0 :width full-width :height full-height)
+              :stroke "#FF2266"
+              :fill "white")))
       
       (draw title-box group)
 
