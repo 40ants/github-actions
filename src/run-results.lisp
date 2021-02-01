@@ -8,7 +8,9 @@
                 #:success-box
                 #:fail-box
                 #:in-progress-box)
-  (:import-from #:cl-ppcre))
+  (:import-from #:cl-ppcre)
+  (:import-from #:rutils
+                #:fmt))
 (in-package github-matrix/run-results)
 
 
@@ -53,6 +55,7 @@
             ;; This is how much we'll reduce the font size on each
             ;; level of GitHub matrix:
             (font-size-ratio 0.85))
+
        (labels ((add-box-to (node names &key box-type)
                   (let ((github-matrix/base-obj::*default-font-size*
                           (* github-matrix/base-obj::*default-font-size*
@@ -75,6 +78,7 @@
                                    :box-type box-type))))))
          (loop with root = (github-matrix/container::make-container (github-matrix/workflow::name workflow))
                for run in runs
+               for run-name = (github-matrix/run::name run)
                for status = (github-matrix/run::status run)
                for conclusion = (github-matrix/run::conclusion run)
                for box-type = (case status
@@ -84,8 +88,17 @@
                                    (t 'fail-box)))
                                 (t
                                  'in-progress-box))
-               for chain = (parse-run-name matrix
-                                           run)
+               for chain = (if matrix
+                               (parse-run-name matrix
+                                               run)
+                               ;; When there is no matrix,
+                               ;; we just put to the container
+                               ;; each run's status.
+                               ;; Example of such workflow is
+                               ;; "Gather values for remainder of steps"
+                               ;; from github/licensed project
+                               (list (fmt "JOB = ~A"
+                                          run-name)))
                do (add-box-to root chain
                               :box-type box-type)
                finally (return root)))))

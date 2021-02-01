@@ -37,6 +37,8 @@
 
 (defvar *last-document* nil)
 
+(defvar *last-workflows* nil)
+
 (defvar *last-runs* nil)
 
 ;; Response will be cached for 15 minutes
@@ -70,15 +72,20 @@
                    for workflow-box = (github-matrix/run-results::runs-to-boxes workflow
                                                                                 :runs runs)
                    for workflow-name = (github-matrix/workflow::name workflow)
-                   do (when *debug*
-                        (setf *last-runs*
-                              runs)
-
-                        (setf *last-document*
-                              workflow-box))
-                      (setf (github-matrix/container::child root workflow-name)
+                   do (setf (github-matrix/container::child root workflow-name)
                             workflow-box)
                    finally (return root))))
+
+      (when *debug*
+        (setf *last-workflows*
+              workflows)
+        
+        (setf *last-runs*
+              (loop for workflow in workflows
+                    collect (github-matrix/run::get-last-run workflow)))
+        
+        (setf *last-document*
+              document))
 
 
       (let* ((width (github-matrix/base-obj::width document))
