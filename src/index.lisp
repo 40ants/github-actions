@@ -163,4 +163,6 @@
 </a>"
                            url
                            badge-url))))
-                   (t (:p "ERROR: Unable to parse URL")))))))))))
+                   (t (if (string= url "")
+                          (:p "ERROR: Please, enter the URL")
+                          (:p "ERROR: Unable to parse URL"))))))))))))

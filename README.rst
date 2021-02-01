@@ -65,3 +65,24 @@ TODO
   This image should be rendered in a special mode and compare pull's results with results
   of the main branch. Diffrentcies should be hightlighted. This will make visible for which
   matrix combinations a pull request makes fixes/breaks tests.
+
+Known Issues
+============
+
+* Badge generator does not work for jobs with custom names like:
+
+  .. code:: yaml
+
+       test:
+         name: ${{ matrix.lisp }} on ${{ matrix.os }}
+         runs-on: ${{ matrix.os }}
+         strategy:
+           matrix:
+             lisp: [sbcl-bin, ccl-bin]
+             os: [ubuntu-latest]
+
+
+  This is because github's API does not returns a matrix state for a run
+  and we have to parse run's name to extract matrix values. Name should
+  have this form instead: ``test (sbcl-bin, ubuntu-latest)``.
+                    
