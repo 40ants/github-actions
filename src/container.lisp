@@ -10,6 +10,7 @@
                 #:font-size)
   (:import-from #:github-matrix/box)
   (:import-from #:github-matrix/colors
+                #:*title-color*
                 #:*tight-container-title-background*
                 #:*tight-container-title-color*)
   (:import-from #:github-matrix/svg
@@ -209,10 +210,11 @@
     (let* ((group (cl-svg:make-group svg ()))
            (full-width (width obj))
            (full-height (height obj))
-           (font-data (anafanafo:load-data :family font-family
-                                           :weight font-weight
-                                           :size font-size))
-           (text-width (anafanafo:string-width font-data title)))
+           ;; (font-data (anafanafo:load-data :family font-family
+           ;;                                 :weight font-weight
+           ;;                                 :size font-size))
+           ;; (text-width (anafanafo:string-width font-data title))
+           )
 
       (when comment
         (cl-svg:comment group
@@ -226,35 +228,14 @@
             :stroke "#FFAA66"
             :fill "white"))
 
-      ;; TODO: replace with svg/text
-      (cl-svg:transform
-          ((cl-svg:translate (1+ margin)
-                             (1+ (+ margin
-                                     font-size))))
-        (cl-svg:text group
-            (:x 0
-             :y 0
-             :font-family font-family
-             :font-weight font-weight
-             :font-size font-size
-             :fill "#ccc"
-             :fill-opacity 0.5
-             :text-length text-width)
-          title))
-      
-      (cl-svg:transform
-          ((cl-svg:translate margin
-                             (+ margin
-                                 font-size)))
-        (cl-svg:text group
-            (:x 0
-             :y 0
-             :font-family font-family
-             :font-weight font-weight
-             :font-size font-size
-             :fill "#555"
-             :text-length text-width)
-          title))
+      (github-matrix/svg:text group title
+        :x margin
+        :y (+ margin font-size)
+        :font-family font-family
+        :font-weight font-weight
+        :font-size font-size
+        :shadow-opacity 0.2
+        :color *title-color*)
 
       (ecase (orientation obj)
         (:row

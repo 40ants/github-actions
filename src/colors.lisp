@@ -3,7 +3,8 @@
   (:export
    #:*tight-container-title-background*
    #:*tight-container-title-color*
-   #:*link-color*))
+   #:*link-color*
+   #:*title-color*))
 (in-package github-matrix/colors)
 
 
@@ -15,4 +16,7 @@
 
 (defparameter *link-color*
   "#3383FA")
+
+(defparameter *title-color*
+  "#555")
 
