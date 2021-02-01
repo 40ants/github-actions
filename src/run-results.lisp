@@ -68,7 +68,8 @@
                            (setf (github-matrix/container::child node cell-name)
                                  (make-instance box-type
                                                 :text cell-name)))))
-                      (t
+                      ((> (length names)
+                          1)
                        (add-box-to (github-matrix/container::child node (car names))
                                    (cdr names)
                                    :box-type box-type))))))

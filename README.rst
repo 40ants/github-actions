@@ -55,3 +55,13 @@ And this is how more complex matrix is rendered:
 .. image:: docs/images/complex.png
 
 
+TODO
+====
+
+* Support more grid layout for workflows with multiple combinations.
+* Let to choose which subset of the matrix to show. This should be interesting
+  for projects having multiple jobs.
+* Add a special webhook which will be able to add an image into the pull-requests.
+  This image should be rendered in a special mode and compare pull's results with results
+  of the main branch. Diffrentcies should be hightlighted. This will make visible for which
+  matrix combinations a pull request makes fixes/breaks tests.

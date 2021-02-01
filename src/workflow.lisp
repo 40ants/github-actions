@@ -37,10 +37,19 @@
                                          (github-matrix/repo::user repo)
                                          (github-matrix/repo::project repo)))
         for item in (getf response :|workflows|)
-        collect (make-workflow repo
-                               (getf item :|id|)
-                               (getf item :|name|)
-                               (getf item :|path|))))
+        for path = (getf item :|path|)
+        ;; Some repositories returns workflows without paths.
+        ;; Probably that is because something is broken inside
+        ;; the GitHub. Here is an example:
+        ;; https://api.github.com/repos/github/licensed/actions/workflows
+        ;; 
+        ;; We need to know YAML config of the workflow. That is why
+        ;; workflows without a path should be filtered out.
+        unless (string= path "")
+          collect (make-workflow repo
+                                 (getf item :|id|)
+                                 (getf item :|name|)
+                                 (getf item :|path|))))
 
 
 (defun workflow-content (workflow)

@@ -62,16 +62,24 @@
   (destructuring-bind (user project)
       (extract-user-and-project uri)
     (let* ((repo (github-matrix/repo::make-repo user project))
-           (workflow (first (github-matrix/workflow::get-workflows repo)))
-           (runs (github-matrix/run::get-last-run workflow))
-           (document (github-matrix/run-results::runs-to-boxes workflow
-                                                               :runs runs)))
-      (when *debug*
-        (setf *last-runs*
-              runs)
+           (workflows (github-matrix/workflow::get-workflows repo))
+           (document
+             (loop with root = (github-matrix/container::make-container "All Workflows")
+                   for workflow in workflows
+                   for runs = (github-matrix/run::get-last-run workflow)
+                   for workflow-box = (github-matrix/run-results::runs-to-boxes workflow
+                                                                                :runs runs)
+                   for workflow-name = (github-matrix/workflow::name workflow)
+                   do (when *debug*
+                        (setf *last-runs*
+                              runs)
 
-        (setf *last-document*
-              document))
+                        (setf *last-document*
+                              workflow-box))
+                      (setf (github-matrix/container::child root workflow-name)
+                            workflow-box)
+                   finally (return root))))
+
 
       (let* ((width (github-matrix/base-obj::width document))
              (footer-text "Rendered by github-actions.40ants.com")
@@ -169,6 +177,9 @@
 
 
 (defun start (port &key (debug nil))
+  (setf github-matrix/metrika:*enabled*
+        (not debug))
+  
   (setf *server*
         (clack:clackup 'process-request
                        :server :woo

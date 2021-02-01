@@ -4,15 +4,20 @@
   (:import-from #:log4cl-extras/error
                 #:with-log-unhandled)
   (:export
-   #:hit))
+   #:hit
+   #:*enabled*))
 (in-package github-matrix/metrika)
+
+
+(defvar *enabled* t)
 
 
 (defun hit (url &key params user-id)
   (ignore-errors
    (with-log-unhandled ()
-     (let ((cl-yandex-metrika:*counter* "71694151"))
-       (funcall #'cl-yandex-metrika:hit
-                url
-                :params params
-                :user-id user-id)))))
+     (when *enabled*
+       (let ((cl-yandex-metrika:*counter* "71694151"))
+         (funcall #'cl-yandex-metrika:hit
+                  url
+                  :params params
+                  :user-id user-id))))))

@@ -101,9 +101,9 @@
   "Depends on max child width"
   (with-slots (children) container
     (loop for child being the hash-value of children
-          maximize (width child) into max-width
+          summing (width child) into row-width
           finally (return
-                    (if (> max-width 400)
+                    (if (> row-width 800)
                         :column
                         :row)))))
 
