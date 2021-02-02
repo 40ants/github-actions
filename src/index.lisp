@@ -100,6 +100,26 @@
                :style "display: inline-block; position: relative; top: 0.2em;"
                (:img :width "160"
                      :src "https://40ants.com/lisp-project-of-the-day/media/images/patreon-btn.png")))
+      
+      (:p "This project's aim is to give all repositories tested by Github Actions a way to show the full build status.")
+      
+      (:raw "<p>Especially it is useful when tests are running under a <a href=\"https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix\">\"matrix\" combinations</a>.</p>")
+
+      (:p "Here is an example of such workflow matrix:")
+
+      (:pre
+       (:code "matrix:
+  os:
+    - ubuntu-latest
+    - macos-latest
+  quicklisp-dist:
+    - quicklisp
+    - ultralisp
+  lisp:
+    - sbcl-bin
+    - ccl-bin
+    - ecl"))
+      
       (:p "Enter the URL of a project to render it's action's matrix:")
       (:div
        (:form :method :get
