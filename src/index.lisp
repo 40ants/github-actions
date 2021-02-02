@@ -113,7 +113,8 @@
 
        (let (is-demo)
          (unless url
-           (setf url demo-url)
+           (setf url demo-url
+                 is-demo t)
 
            (:style ".preview {
                       position: relative;}
