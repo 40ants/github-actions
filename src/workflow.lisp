@@ -1,9 +1,7 @@
 (mgl-pax-minimal:define-package #:github-matrix/workflow
   (:use #:cl)
   (:import-from #:github)
-  (:import-from #:github-matrix/repo)
-  (:import-from #:rutils
-                #:fmt))
+  (:import-from #:github-matrix/repo))
 (in-package github-matrix/workflow)
 
 
@@ -33,9 +31,10 @@
 
 
 (defun get-workflows (repo)
-  (loop with response = (github:get (fmt "/repos/~A/~A/actions/workflows"
-                                         (github-matrix/repo::user repo)
-                                         (github-matrix/repo::project repo)))
+  (loop with response = (github:get "/repos/~A/~A/actions/workflows"
+                                    :params (list
+                                             (github-matrix/repo::user repo)
+                                             (github-matrix/repo::project repo)))
         for item in (getf response :|workflows|)
         for path = (getf item :|path|)
         ;; Some repositories returns workflows without paths.

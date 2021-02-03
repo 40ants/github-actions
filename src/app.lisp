@@ -39,7 +39,7 @@
 
 (defvar *last-workflows* nil)
 
-(defvar *last-runs* nil)
+(defvar *last-repo* nil)
 
 ;; Response will be cached for 15 minutes
 (progn
@@ -58,34 +58,51 @@
     (list user project)))
 
 
+(defun fetch-data (user project)
+  (let* ((repo (github-matrix/repo::make-repo user project))
+         (workflows (github-matrix/workflow::get-workflows repo))
+         (all-runs nil)
+         (document
+           (loop with root = (github-matrix/container::make-container "All Workflows")
+                 for workflow in workflows
+                 for runs = (github-matrix/run::get-last-run workflow)
+                 for workflow-box = (when runs
+                                      ;; We don't want to show workflows
+                                      ;; without any runs. Most probably, these
+                                      ;; workflows were applied to another branch.
+                                      (github-matrix/run-results::runs-to-boxes workflow
+                                                                                :runs runs))
+                 for workflow-name = (github-matrix/workflow::name workflow)
+                 collect runs into collected-runs
+                 when workflow-box
+                   do (setf (github-matrix/container::child root workflow-name)
+                            workflow-box)
+                 finally (setf all-runs collected-runs)
+                         (return root))))
+
+    (values document
+            repo
+            (loop for w in workflows
+                  for r in all-runs
+                  collect (cons w r)))))
+
+
 (defcached (make-svg-response
             :timeout *cache-timeout*)
     (uri)
   (destructuring-bind (user project)
       (extract-user-and-project uri)
-    (let* ((repo (github-matrix/repo::make-repo user project))
-           (workflows (github-matrix/workflow::get-workflows repo))
-           (document
-             (loop with root = (github-matrix/container::make-container "All Workflows")
-                   for workflow in workflows
-                   for runs = (github-matrix/run::get-last-run workflow)
-                   for workflow-box = (github-matrix/run-results::runs-to-boxes workflow
-                                                                                :runs runs)
-                   for workflow-name = (github-matrix/workflow::name workflow)
-                   do (setf (github-matrix/container::child root workflow-name)
-                            workflow-box)
-                   finally (return root))))
+    (multiple-value-bind (document repo workflows-with-runs)
+        (fetch-data user project)
+          
 
       (when *debug*
         (setf *last-workflows*
-              workflows)
-        
-        (setf *last-runs*
-              (loop for workflow in workflows
-                    collect (github-matrix/run::get-last-run workflow)))
-        
+              workflows-with-runs)
         (setf *last-document*
-              document))
+              document)
+        (setf *last-repo*
+              repo))
 
 
       (let* ((width (github-matrix/base-obj::width document))

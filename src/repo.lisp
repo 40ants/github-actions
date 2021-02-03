@@ -61,9 +61,9 @@
 (defun get-default-branch (repo)
   (handler-case
       (getf
-       (github:get (fmt "https://api.github.com/repos/~A/~A"
-                        (user repo)
-                        (project repo)))
+       (github:get "https://api.github.com/repos/~A/~A"
+                   :params (list (user repo)
+                                 (project repo)))
        :|default_branch|)
     (dexador:http-request-not-found ()
       nil)))

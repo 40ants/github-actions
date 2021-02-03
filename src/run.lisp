@@ -1,7 +1,5 @@
 (mgl-pax-minimal:define-package #:github-matrix/run
   (:use #:cl)
-  (:import-from #:rutils
-                #:fmt)
   (:import-from #:github-matrix/repo)
   (:import-from #:github-matrix/workflow)
   (:import-from #:alexandria
@@ -40,24 +38,21 @@
            (user (github-matrix/repo::user repo))
            (project (github-matrix/repo::project repo))
            (branch (github-matrix/repo::branch repo))
-           (url (fmt "/repos/~A/~A/actions/workflows/~A/runs"
-                     user
-                     project
-                     workflow-id))
-           (response (github:get url
-                                 :params (list (cons "branch"
-                                                     branch))
+           (response (github:get "/repos/~A/~A/actions/workflows/~A/runs?branch=~A"
+                                 :params (list user
+                                               project
+                                               workflow-id
+                                               branch)
                                  :limit 1))
            (all-runs (getf response :|workflow_runs|))
            (data (first all-runs)))
 
       (when data
         (let* ((check-suite-id (getf data :|check_suite_id|))
-               (url (fmt "/repos/~A/~A/check-suites/~A/check-runs"
-                         user
-                         project
-                         check-suite-id))
-               (response (github:get url))
+               (response (github:get "/repos/~A/~A/check-suites/~A/check-runs"
+                                     :params (list user
+                                                   project
+                                                   check-suite-id)))
                (runs-data (getf response :|check_runs|)))
           (loop for item in runs-data
                 collect (make-run (getf item :|name|)
