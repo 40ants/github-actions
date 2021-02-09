@@ -46,6 +46,7 @@
                       (project repo)
                       (branch repo)
                       path)))
+        (log:info "Fetching ~A" url)
         (values (dex:get url)))
     (dexador.error:http-request-not-found (c)
       (declare (ignore c))
