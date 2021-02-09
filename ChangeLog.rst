@@ -2,6 +2,12 @@
  Changelog
 ===========
 
+0.2.0 (2021-02-09)
+==================
+
+* Now it is possible to specify a branch.
+  Just add as a parameter to URL: ``matrix.svg?branch=release``.
+
 0.1.1 (2021-02-09)
 ==================
 

@@ -58,8 +58,9 @@
     (list user project)))
 
 
-(defun fetch-data (user project)
-  (let* ((repo (github-matrix/repo::make-repo user project))
+(defun fetch-data (user project &key branch)
+  (let* ((repo (github-matrix/repo::make-repo user project
+                                              :branch branch))
          (workflows (github-matrix/workflow::get-workflows repo))
          (all-runs nil)
          (document
@@ -85,11 +86,12 @@
 
 (defcached (make-svg-response
             :timeout *cache-timeout*)
-    (uri)
+    (uri &key branch)
   (destructuring-bind (user project)
       (extract-user-and-project uri)
     (multiple-value-bind (document repo workflows-with-runs)
-        (fetch-data user project)
+        (fetch-data user project
+                    :branch branch)
           
 
       (when *debug*
@@ -165,6 +167,7 @@
              (list 200
                    '(:content-type "text/html")
                    (list (apply 'github-matrix/index:render env params))))
+            
             ((and (string= "/debug" path-info)
                   *debug*)
              (list 200
@@ -174,12 +177,13 @@
                               (alexandria:hash-table-alist
                                (getf *last-env*
                                      :headers))))))
+            
             ((extract-user-and-project
               path-info)
-             ;; Register the hit in the Analytics
-             (destructuring-bind (&key demo &allow-other-keys)
+             (destructuring-bind (&key demo branch &allow-other-keys)
                  params
-               
+
+               ;; Register the hit in the Analytics
                (unless demo
                  (github-matrix/metrika:hit path-info))
                
@@ -188,7 +192,8 @@
                      (list :content-type "image/svg+xml;charset=utf-8"
                            :cache-control (fmt "max-age=~A"
                                                *cache-timeout*))
-                     (list (make-svg-response path-info)))))
+                     (list (make-svg-response path-info
+                                              :branch branch)))))
             (t
              (list 404
                    '(:content-type "text/plain")
