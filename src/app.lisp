@@ -66,12 +66,8 @@
            (loop with root = (github-matrix/container::make-container "All Workflows")
                  for workflow in workflows
                  for runs = (github-matrix/run::get-last-run workflow)
-                 for workflow-box = (when runs
-                                      ;; We don't want to show workflows
-                                      ;; without any runs. Most probably, these
-                                      ;; workflows were applied to another branch.
-                                      (github-matrix/run-results::runs-to-boxes workflow
-                                                                                :runs runs))
+                 for workflow-box = (github-matrix/run-results::runs-to-boxes workflow
+                                                                              :runs runs)
                  for workflow-name = (github-matrix/workflow::name workflow)
                  collect runs into collected-runs
                  when workflow-box
