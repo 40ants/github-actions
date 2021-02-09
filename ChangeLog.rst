@@ -7,6 +7,8 @@
 
 * Now it is possible to specify a branch.
   Just add as a parameter to URL: ``matrix.svg?branch=release``.
+* Fixed rendering of a title for containers having only one item inside.
+  Now badge should be more compact.
 
 0.1.1 (2021-02-09)
 ==================

@@ -156,13 +156,13 @@
                 (loop for child in children
                       summing (height child)))))
           (cond
-            ;; If there is only one child and it is not a tight,
+            ;; If there is only one child
             ;; then there is no reason
             ;; to render outer container
+            ;; and we don't need to reserve space
+            ;; for its header.
             ((and (= (length children)
-                     1)
-                  (not (typep (first children)
-                              'tight-container)))
+                     1))
              0)
             ;; Otherwise, draw them all!
             (t
@@ -192,12 +192,16 @@
            (first-child (car children)))
 
       (cond
-        ;; If there is only one child and it is not a tight,
+        ;; If there is only one child
         ;; then there is no reason
-        ;; to render outer container
+        ;; to render outer container.
+        ;; 
+        ;; But for tight containers we always want
+        ;; to render it's title and can't remove
+        ;; it from the rendering pipeline.
         ((and (= (length children)
                  1)
-              (not (typep first-child
+              (not (typep obj
                           'tight-container)))
          (draw first-child svg))
         ;; Otherwise, draw them all!
