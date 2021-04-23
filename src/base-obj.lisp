@@ -1,4 +1,4 @@
-(mgl-pax-minimal:define-package #:github-matrix/base-obj
+(uiop:define-package #:github-matrix/base-obj
   (:use #:cl))
 (in-package github-matrix/base-obj)
 

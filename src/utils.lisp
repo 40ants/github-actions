@@ -1,4 +1,4 @@
-(mgl-pax-minimal:define-package #:github-matrix/utils
+(uiop:define-package #:github-matrix/utils
   (:use #:cl)
   (:import-from #:rutils
                 #:fmt)

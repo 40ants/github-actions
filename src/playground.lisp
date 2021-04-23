@@ -1,4 +1,4 @@
-(mgl-pax-minimal:define-package #:github-matrix/playground
+(uiop:define-package #:github-matrix/playground
   (:use #:cl)
   (:import-from #:cl-svg)
   (:import-from #:github-matrix/run-results)

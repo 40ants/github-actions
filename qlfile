@@ -1,7 +1,2 @@
 dist ultralisp http://dist.ultralisp.org/
 
-github mgl-pax svetlyak40wt/mgl-pax :branch mgl-pax-minimal
-
-# It depends on the mgl-pax patch fixed above:
-github anafanafo 40ants/cl-anafanafo
-

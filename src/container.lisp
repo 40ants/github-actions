@@ -1,4 +1,4 @@
-(mgl-pax-minimal:define-package #:github-matrix/container
+(uiop:define-package #:github-matrix/container
   (:use #:cl)
   (:import-from #:github-matrix/base-obj
                 #:obj-with-font

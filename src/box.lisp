@@ -1,4 +1,4 @@
-(mgl-pax-minimal:define-package #:github-matrix/box
+(uiop:define-package #:github-matrix/box
   (:use #:cl)
   (:import-from #:github-matrix/base-obj
                 #:obj-with-font

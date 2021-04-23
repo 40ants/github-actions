@@ -1,4 +1,4 @@
-(mgl-pax-minimal:define-package #:github-matrix/yaml
+(uiop:define-package #:github-matrix/yaml
   (:use #:cl)
   (:import-from #:cl-yaml))
 (in-package github-matrix/yaml)

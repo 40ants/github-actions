@@ -1,4 +1,4 @@
-(mgl-pax-minimal:define-package #:github-matrix/run-results
+(uiop:define-package #:github-matrix/run-results
   (:use #:cl)
   (:import-from #:github-matrix/run)
   (:import-from #:github-matrix/container)
