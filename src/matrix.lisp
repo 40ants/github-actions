@@ -23,11 +23,10 @@
         (loop for (job-name params) in jobs
               for matrix = (g (g params "strategy")
                               "matrix")
-              when matrix
-                collect (list* job-name
-                               (remove-if #'matrix-keyword
-                                          (mapcar #'first
-                                                  matrix))))))))
+              collect (list* job-name
+                             (remove-if #'matrix-keyword
+                                        (mapcar #'first
+                                                matrix))))))))
 
 
 (defun workflow-matrix (workflow)

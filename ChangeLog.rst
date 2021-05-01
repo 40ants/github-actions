@@ -7,6 +7,8 @@
 
 * Fixed rendering of the blocks with only one
   children which is a tight container.
+* Fixed rendering of workflows with multiple jobs in case
+  if some jobs have workflows and some don't.
 
 0.2.0 (2021-02-09)
 ==================
