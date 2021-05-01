@@ -148,11 +148,11 @@
     (let ((children (hash-table-values children)))
       (+ (ecase (orientation obj)
            (:row
-            (+ (* margin 2)
+            (+ margin
                 (loop for child in children
                       maximizing (height child))))
            (:column
-            (+ (* margin (1+ (length children)))
+            (+ (* margin (length children))
                 (loop for child in children
                       summing (height child)))))
           (cond
@@ -161,8 +161,7 @@
             ;; to render outer container
             ;; and we don't need to reserve space
             ;; for its header.
-            ((and (= (length children)
-                     1))
+            ((should-we-render-only-a-child obj)
              0)
             ;; Otherwise, draw them all!
             (t
@@ -186,6 +185,16 @@
           maximizing (height child))))
 
 
+(defun should-we-render-only-a-child (container)
+  (with-slots (children) container
+    (let* ((children (alexandria:hash-table-values children))
+           (first-child (car children)))
+      (and (= (length children)
+              1)
+           (not (typep first-child
+                       'tight-container))))))
+
+
 (defmethod draw ((obj container) svg)
   (with-slots (children) obj
     (let* ((children (alexandria:hash-table-values children))
@@ -199,10 +208,7 @@
         ;; But for tight containers we always want
         ;; to render it's title and can't remove
         ;; it from the rendering pipeline.
-        ((and (= (length children)
-                 1)
-              (not (typep first-child
-                          'tight-container)))
+        ((should-we-render-only-a-child obj)
          (draw first-child svg))
         ;; Otherwise, draw them all!
         (t
@@ -225,7 +231,7 @@
           (rutils:fmt "~A font-size: ~A"
                       comment
                       font-size)))
-      
+
       (when *debug-sizes*
         (cl-svg:draw group
             (:rect :x 0 :y 0 :width full-width :height full-height)
@@ -243,10 +249,14 @@
 
       (ecase (orientation obj)
         (:row
-         (loop with x = 0
-               with y = (+ (header-height obj)
-                            margin)
+         (loop with max-height = (loop for child being the hash-value of children
+                                       maximize (height child))
+               with x = 0
                for child being the hash-value of children
+               for y = (+ (header-height obj)
+                           margin
+                           (- max-height
+                               (height child)))
                do (cl-svg:transform (cl-svg:translate
                                      x
                                      y)

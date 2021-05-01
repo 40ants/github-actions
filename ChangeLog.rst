@@ -9,6 +9,8 @@
   children which is a tight container.
 * Fixed rendering of workflows with multiple jobs in case
   if some jobs have workflows and some don't.
+* Fixed container's height calculation. And now all containers
+  in a row are aligned to the bottom.
 
 0.2.0 (2021-02-09)
 ==================
