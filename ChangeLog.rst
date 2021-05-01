@@ -11,6 +11,7 @@
   if some jobs have workflows and some don't.
 * Fixed container's height calculation. And now all containers
   in a row are aligned to the bottom.
+* Now all color boxes have the same font size.
 
 0.2.0 (2021-02-09)
 ==================

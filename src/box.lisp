@@ -28,12 +28,22 @@
 
 (defclass success-box (box)
   ()
-  (:default-initargs :background "#4D994D"))
+  (:default-initargs
+   :background "#4D994D"
+   :font-size 10))
 
 
 (defclass fail-box (box)
   ()
-  (:default-initargs :background "#E6705C"))
+  (:default-initargs
+   :background "#E6705C"
+   :font-size 10))
+
+
+(defclass title-box (box)
+  ()
+  (:default-initargs
+   :font-size 10))
 
 
 (defclass in-progress-box (box)

@@ -16,7 +16,9 @@
   (:import-from #:github-matrix/svg
                 #:draw-box-with-text)
   (:import-from #:alexandria
-                #:hash-table-values))
+                #:hash-table-values)
+  (:import-from #:rutils
+                #:fmt))
 (in-package github-matrix/container)
 
 
@@ -65,7 +67,7 @@
                                          title-background)
   (declare (ignore initargs))
   (setf (slot-value obj 'title-box)
-        (make-instance 'github-matrix/box::box
+        (make-instance 'github-matrix/box::title-box
                        :text title
                        :color title-color
                        :background title-background)))
@@ -191,6 +193,8 @@
            (first-child (car children)))
       (and (= (length children)
               1)
+           (not (typep container
+                       'tight-container))
            (not (typep first-child
                        'tight-container))))))
 
@@ -228,9 +232,9 @@
 
       (when comment
         (cl-svg:comment group
-          (rutils:fmt "~A font-size: ~A"
-                      comment
-                      font-size)))
+          (fmt "~A font-size: ~A"
+               comment
+               font-size)))
 
       (when *debug-sizes*
         (cl-svg:draw group
@@ -286,10 +290,10 @@
 
       (when comment
         (cl-svg:comment group
-          (rutils:fmt "~A font-size: ~A"
-                      comment
-                      font-size)))
-
+          (fmt "~A font-size: ~A"
+               comment
+               font-size)))
+      
       (when *debug-sizes*
         (let ((full-width (width obj))
               (full-height (height obj)))
