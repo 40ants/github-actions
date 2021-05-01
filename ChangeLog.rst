@@ -2,6 +2,12 @@
  Changelog
 ===========
 
+0.3.0 (2021-05-01)
+==================
+
+* Fixed rendering of the blocks with only one
+  children which is a tight container.
+
 0.2.0 (2021-02-09)
 ==================
 

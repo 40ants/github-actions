@@ -201,7 +201,7 @@
         ;; it from the rendering pipeline.
         ((and (= (length children)
                  1)
-              (not (typep obj
+              (not (typep first-child
                           'tight-container)))
          (draw first-child svg))
         ;; Otherwise, draw them all!
