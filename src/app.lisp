@@ -42,15 +42,19 @@
 (defvar *last-repo* nil)
 
 ;; Response will be cached for 15 minutes
-(progn
-  (defvar *make-svg-response-cache* nil)
-  (defparameter *cache-timeout* (* 15 60))
+(defvar *make-svg-response-cache* nil)
+
+(defparameter *cache-timeout*
+  (* 15 60))
+
+(defun reset-cache-timeout (new-timeout)
+  (setf *cache-timeout*
+        new-timeout)
   
   (when *make-svg-response-cache*
     (function-cache:clear-cache *make-svg-response-cache*)
     (setf (function-cache:timeout *make-svg-response-cache*)
           *cache-timeout*)))
-
 
 (defun extract-user-and-project (uri)
   (register-groups-bind (user project)
@@ -209,6 +213,9 @@
         (not debug))
 
   (setf *debug* debug)
+
+  (when *debug*
+    (reset-cache-timeout 1))
   
   (setf *server*
         (clack:clackup 'process-request
