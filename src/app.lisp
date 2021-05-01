@@ -163,7 +163,8 @@
                   env))
           
           (cond
-            ((string= "/" path-info)
+            ((or (string= "/" path-info)
+                 (null path-info))
              (list 200
                    '(:content-type "text/html")
                    (list (apply 'github-matrix/index:render env params))))
@@ -174,9 +175,10 @@
                    '(:content-type "text/plain")
                    (list (fmt "Last env:~%~S~2&Headers:~%~S"
                               *last-env*
-                              (alexandria:hash-table-alist
-                               (getf *last-env*
-                                     :headers))))))
+                              (when *last-env*
+                                (alexandria:hash-table-alist
+                                 (getf *last-env*
+                                       :headers)))))))
             
             ((extract-user-and-project
               path-info)
@@ -201,14 +203,17 @@
                               path-info))))))))))
 
 
-(defun start (port &key (debug nil))
+(defun start (port &key (debug nil)
+                        (address "0.0.0.0"))
   (setf github-matrix/metrika:*enabled*
         (not debug))
+
+  (setf *debug* debug)
   
   (setf *server*
         (clack:clackup 'process-request
                        :server :woo
-                       :address "0.0.0.0"
+                       :address address
                        :debug debug
                        :port port)))
 

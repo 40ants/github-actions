@@ -27,6 +27,7 @@
   (declare (ignore rest))
   
   (unless branch
+    (log:info "Setting branch to default")
     (setf (slot-value obj 'branch)
           (get-default-branch obj))))
 
