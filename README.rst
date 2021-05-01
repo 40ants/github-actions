@@ -55,6 +55,15 @@ And this is how more complex matrix is rendered:
 .. image:: docs/images/complex.png
 
 
+How to test locally
+===================
+
+::
+
+   (ql:quickload :github-matrix/app)
+   
+   (github-matrix/app:start 8081 :debug t)
+
 TODO
 ====
 
