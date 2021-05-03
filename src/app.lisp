@@ -19,7 +19,9 @@
   (:import-from #:github-matrix/metrika)
   (:import-from #:github-matrix/index)
   (:import-from #:github-matrix/workflow)
-  (:import-from #:github-matrix/run-results)
+  (:import-from #:github-matrix/run
+                #:job-name
+                #:run-params-results)
   (:import-from #:github-matrix/base-obj)
   (:import-from #:github-matrix/svg)
   (:export
@@ -62,40 +64,73 @@
     (list user project)))
 
 
-(defun fetch-data (user project &key branch)
-  (let* ((repo (github-matrix/repo::make-repo user project
-                                              :branch branch))
-         (workflows (github-matrix/workflow::get-workflows repo))
-         (all-runs nil)
-         (document
-           (loop with root = (github-matrix/container::make-container "All Workflows")
-                 for workflow in workflows
-                 for runs = (github-matrix/run::get-last-run workflow)
-                 for workflow-box = (github-matrix/run-results::runs-to-boxes workflow
-                                                                              :runs runs)
-                 for workflow-name = (github-matrix/workflow::name workflow)
-                 collect runs into collected-runs
-                 when workflow-box
+(defun fetch-data (user project &key branch only)
+  (flet ((workflow-is-allowed (workflow)
+           (or (null only)
+               (assoc (github-matrix/workflow::name workflow)
+                      only
+                      :test #'string-equal)))
+         (make-run-filter (workflow)
+           (let ((rules
+                   (loop for rule in only
+                         for workflow-name = (car rule)
+                         for job-params = (cdr rule)
+                         when (and (string-equal workflow-name
+                                                 (github-matrix/workflow::name
+                                                  workflow))
+                                   job-params)
+                         collect job-params)))
+             
+             (cond
+               (rules
+                (lambda (run)
+                  (loop for rule in rules
+                        for position = (search rule
+                                               (list*
+                                                (job-name run)
+                                                (run-params run))
+                                               :test #'string-equal)
+                        thereis (and position
+                                     (zerop position)))))
+               (t
+                (constantly t))))))
+    (let* ((repo (github-matrix/repo::make-repo user project
+                                                :branch branch))
+           (workflows (remove-if-not #'workflow-is-allowed
+                                     (github-matrix/workflow::get-workflows repo)))
+           (all-runs nil)
+           (document
+             (loop with root = (github-matrix/container::make-container "All Workflows")
+                   for workflow in workflows
+                   for workflow-name = (github-matrix/workflow::name workflow)
+                   for runs = (remove-if-not
+                               (make-run-filter workflow)
+                               (github-matrix/run::get-last-run workflow))
+                   for workflow-box = (github-matrix/run-results::runs-to-boxes workflow
+                                                                                :runs runs)
+                   collect runs into collected-runs
+                   when workflow-box
                    do (setf (github-matrix/container::child root workflow-name)
                             workflow-box)
-                 finally (setf all-runs collected-runs)
-                         (return root))))
+                   finally (setf all-runs collected-runs)
+                           (return root))))
 
-    (values document
-            repo
-            (loop for w in workflows
-                  for r in all-runs
-                  collect (cons w r)))))
+      (values document
+              repo
+              (loop for w in workflows
+                    for r in all-runs
+                    collect (cons w r))))))
 
 
 (defcached (make-svg-response
             :timeout *cache-timeout*)
-    (uri &key branch)
+    (uri &key branch only)
   (destructuring-bind (user project)
       (extract-user-and-project uri)
     (multiple-value-bind (document repo workflows-with-runs)
         (fetch-data user project
-                    :branch branch)
+                    :branch branch
+                    :only only)
           
 
       (when *debug*
@@ -148,10 +183,24 @@
                            (string-upcase key))
                           value))))
 
+(defun parse-only-param (string)
+  "Parses a string like \"run-tests.ubuntu-latest,linter\"
+   into a list of lists:
+
+   ```
+   ((\"run-tests\" \"ubuntu-latest\")
+    (\"linter\"))
+   ```
+"
+  (when string
+    (loop for part in (str:split "," string)
+          collect (mapcar #'str:trim
+                          (str:split "." part)))))
+
 (defun process-request (env)
   (destructuring-bind (&key
-                         path-info
-                         query-string
+                       path-info
+                       query-string
                        &allow-other-keys)
       env
     (let ((params (parse-params query-string)))
@@ -186,7 +235,7 @@
             
             ((extract-user-and-project
               path-info)
-             (destructuring-bind (&key demo branch &allow-other-keys)
+             (destructuring-bind (&key demo branch only &allow-other-keys)
                  params
 
                ;; Register the hit in the Analytics
@@ -199,7 +248,8 @@
                            :cache-control (fmt "max-age=~A"
                                                *cache-timeout*))
                      (list (make-svg-response path-info
-                                              :branch branch)))))
+                                              :branch branch
+                                              :only (parse-only-param only))))))
             (t
              (list 404
                    '(:content-type "text/plain")

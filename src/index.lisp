@@ -55,15 +55,16 @@
     (values user project)))
 
 
-(defun make-badge-url-from-github-url (env url)
+(defun make-badge-url-from-github-url (env url only)
   (multiple-value-bind (user project)
       (extract-user-and-project url)
     (when (and user project)
       (let ((base-url (get-base-url env)))
-        (fmt "~A/~A/~A/matrix.svg"
+        (fmt "~A/~A/~A/matrix.svg~@[?only=~A~]"
              base-url
              user
-             project)))))
+             project
+             only)))))
 
 
 (defun random-demo-url ()
@@ -71,8 +72,11 @@
     (nth idx *demo-urls*)))
 
 
-(defun render (env &key url &allow-other-keys &aux (demo-url
-                                                    (random-demo-url)))
+(defun render (env &key url
+                        only
+                   &allow-other-keys
+                   &aux (demo-url
+                         (random-demo-url)))
   (spinneret:with-html-string
     (:html
      (:head 
@@ -151,7 +155,7 @@
          
          (log:debug "Creating preview for" url)
 
-         (let ((badge-url (make-badge-url-from-github-url env url)))
+         (let ((badge-url (make-badge-url-from-github-url env url only)))
            (:div :class "preview"
                  (:h2 "Preview")
                  (cond

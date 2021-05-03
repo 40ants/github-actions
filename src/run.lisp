@@ -3,7 +3,10 @@
   (:import-from #:github-matrix/repo)
   (:import-from #:github-matrix/workflow)
   (:import-from #:alexandria
-                #:make-keyword))
+                #:make-keyword)
+  (:export
+   #:job-name
+   #:run-params))
 (in-package github-matrix/run)
 
 
@@ -58,3 +61,40 @@
                 collect (make-run (getf item :|name|)
                                   (getf item :|status|)
                                   (getf item :|conclusion|))))))))
+
+
+(defun job-name (run)
+  (check-type run run)
+  (let ((run-name (github-matrix/run::name run)))
+    (or
+     (cl-ppcre:register-groups-bind (job-name)
+         ("(.*?) \\((?:.*)\\)" run-name)
+       (values job-name))
+     ;; If job has no matrix, then
+     ;; it will have only one run the the same name
+     ;; as job's name:
+     (values run-name))))
+
+
+(defun run-params (run)
+  "Parses run name of form:
+
+   \"run_tests (sbcl-bin, ubuntu-latest, quicklisp)\"
+
+   and returns a list:
+
+   ```
+   (\"sbcl-bin\" \"ubuntu-latest\" \"quicklisp\")
+   ```
+
+   If matrix is NIL then run will have only
+   a job's name and this function will return just NIL.
+"
+  
+  (check-type run run)
+  
+  (let ((run-name (github-matrix/run::name run)))
+    (cl-ppcre:register-groups-bind (params)
+        ("(?:.*?) \\((.*)\\)" run-name)
+      (let ((params (cl-ppcre:split ", " params)))
+        (values params)))))

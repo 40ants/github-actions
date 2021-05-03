@@ -12,6 +12,12 @@
 * Fixed container's height calculation. And now all containers
   in a row are aligned to the bottom.
 * Now all color boxes have the same font size.
+* Added ability to select a subset of workflows/jobs to render.
+  Use parameter ``only``. It should be a comma-separated list
+  of paths, where each path consist of a workflow name, job name
+  and job parameters, separated with dots::
+
+    only=ci.run-tests.ubuntu-latest.ultralisp,ci.linter
 
 0.2.0 (2021-02-09)
 ==================

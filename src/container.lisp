@@ -8,7 +8,8 @@
                 #:font-family
                 #:font-weight
                 #:font-size)
-  (:import-from #:github-matrix/box)
+  (:import-from #:github-matrix/box
+                #:in-progress-box)
   (:import-from #:github-matrix/colors
                 #:*title-color*
                 #:*tight-container-title-background*
@@ -18,11 +19,17 @@
   (:import-from #:alexandria
                 #:hash-table-values)
   (:import-from #:rutils
-                #:fmt))
+                #:fmt)
+  (:import-from #:serapeum
+                #:defvar-unbound))
 (in-package github-matrix/container)
 
 
 (defvar *debug-sizes* nil)
+
+
+(defvar-unbound *num-leaf-containers*
+  "Here we'll put a number of leaf when executing a body of the WITH-LEAFS-COUNTED macro.")
 
 
 (defclass container (obj-with-font)
@@ -102,6 +109,29 @@
                   (make-container name))))))
 
 
+(defmacro with-leafs-counted ((container) &body body)
+  `(let ((*num-leaf-containers* (if (boundp '*num-leaf-containers*)
+                                    *num-leaf-containers*
+                                    (count-leafs ,container))))
+     (format t "NUM LEAFS FOR Cont: ~S - ~S~%"
+             ,container
+             *num-leaf-containers*)
+     ,@body))
+
+
+(defun count-leafs (container)
+  (etypecase container
+    (in-progress-box 1)
+    (tight-container 1)
+    (container
+     (with-slots (children)
+         container
+       (if (zerop (hash-table-count children))
+           1
+           (loop for child being the hash-value of children
+                 summing (count-leafs child)))))))
+
+
 (defun orientation (container)
   "Depends on max child width"
   (with-slots (children) container
@@ -144,32 +174,41 @@
         (* margin 2))))
 
 
+(defmethod height :around ((obj container))
+  (with-leafs-counted (obj)
+    (call-next-method)))
+
+
 (defmethod height ((obj container))
   (with-slots (children font-size margin)
       obj
     (let ((children (hash-table-values children)))
-      (+ (ecase (orientation obj)
-           (:row
-            (+ margin
-                (loop for child in children
-                      maximizing (height child))))
-           (:column
-            (+ (* margin (length children))
-                (loop for child in children
-                      summing (height child)))))
-          (cond
-            ;; If there is only one child
-            ;; then there is no reason
-            ;; to render outer container
-            ;; and we don't need to reserve space
-            ;; for its header.
-            ((should-we-render-only-a-child obj)
-             0)
-            ;; Otherwise, draw them all!
-            (t
-             ;; We draw header only if there is more than one
-             ;; child in the box:
-             (header-height obj)))))))
+      (cond
+        ((should-we-render-only-a-child obj)
+         (height (first children)))
+        ;; otherwise
+        (t (+ (ecase (orientation obj)
+                (:row
+                 (+ margin
+                     (loop for child in children
+                           maximizing (height child))))
+                (:column
+                 (+ (* margin (length children))
+                     (loop for child in children
+                           summing (height child)))))
+               (cond
+                 ;; If there is only one child
+                 ;; then there is no reason
+                 ;; to render outer container
+                 ;; and we don't need to reserve space
+                 ;; for its header.
+                 ((should-we-render-only-a-child obj)
+                  0)
+                 ;; Otherwise, draw them all!
+                 (t
+                  ;; We draw header only if there is more than one
+                  ;; child in the box:
+                  (header-height obj)))))))))
 
 
 (defmethod width ((obj tight-container))
@@ -188,15 +227,14 @@
 
 
 (defun should-we-render-only-a-child (container)
-  (with-slots (children) container
-    (let* ((children (alexandria:hash-table-values children))
-           (first-child (car children)))
-      (and (= (length children)
-              1)
-           (not (typep container
-                       'tight-container))
-           (not (typep first-child
-                       'tight-container))))))
+  (and (not (typep container 'tight-container))
+       (= *num-leaf-containers*
+          1)))
+
+
+(defmethod draw :around ((obj container) svg)
+  (with-leafs-counted (obj)
+    (call-next-method)))
 
 
 (defmethod draw ((obj container) svg)

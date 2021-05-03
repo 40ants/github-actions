@@ -42,25 +42,17 @@
    (\"job=linter\")
    ```
 "
-  (let ((run-name (github-matrix/run::name run)))
-    (or
-     (cl-ppcre:register-groups-bind (job-name params)
-         ("(.*?) \\((.*)\\)" run-name)
-       (let ((job-matrix (cdr (assoc job-name workflow-matrix
-                                     :test #'string-equal)))
-             (params (cl-ppcre:split ", " params)))
-         (list* (format nil "JOB = ~A"
-                        job-name)
-                (loop for param in params
-                      for matrix-key in job-matrix
-                      collect (format nil "~A = ~A"
-                                      (string-upcase matrix-key)
-                                      param)))))
-     ;; If job has no matrix, then
-     ;; it will have only one run the the same name
-     ;; as job's name:
-     (list (fmt "JOB = ~A"
-                run-name)))))
+  (let ((job-name (github-matrix/run:job-name run))
+        (run-params (github-matrix/run:run-params run)))
+    (let ((job-matrix (cdr (assoc job-name workflow-matrix
+                                  :test #'string-equal))))
+      (list* (format nil "JOB = ~A"
+                     job-name)
+             (loop for param in run-params
+                   for matrix-key in job-matrix
+                   collect (format nil "~A = ~A"
+                                   (string-upcase matrix-key)
+                                   param))))))
 
 
 (defun runs-to-boxes (workflow &key (runs (github-matrix/run::get-last-run workflow)))
