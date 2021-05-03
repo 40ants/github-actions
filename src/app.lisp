@@ -20,6 +20,7 @@
   (:import-from #:github-matrix/index)
   (:import-from #:github-matrix/workflow)
   (:import-from #:github-matrix/run
+                #:run-params
                 #:job-name)
   (:import-from #:github-matrix/base-obj)
   (:import-from #:github-matrix/svg)
