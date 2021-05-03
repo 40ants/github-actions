@@ -26,6 +26,8 @@
   (:import-from #:github-matrix/container
                 #:leafs-count
                 #:with-leafs-counted)
+  (:import-from #:github-matrix/run-results
+                #:runs-to-boxes)
   (:export
    #:stop
    #:start
@@ -108,7 +110,7 @@
                    for runs = (remove-if-not
                                (make-run-filter workflow)
                                (github-matrix/run::get-last-run workflow))
-                   for workflow-box = (github-matrix/run-results::runs-to-boxes workflow
+                   for workflow-box = (runs-to-boxes workflow
                                                                                 :runs runs)
                    collect runs into collected-runs
                    when workflow-box
