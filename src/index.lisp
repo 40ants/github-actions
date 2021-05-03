@@ -144,26 +144,27 @@
        (let (is-demo)
          (unless url
            (setf url demo-url
-                 is-demo t))
+                 is-demo t)
+           (:style ".preview {
+                      position: relative;}
+                  
+                    .preview:before {
+                      content: \"\";
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      display: block;
+                      background: rgba(255, 255, 255, 0.5);}"))
 
+         ;; common style
          (:style ".footer {
                     color: #999;
                     border-top: 1px solid gray;
                     text-align: center;
                     margin-top: 4em;
-                  }
-                  .preview {
-                    position: relative;}
-                  
-                  .preview:before {
-                    content: \"\";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    display: block;
-                    background: rgba(255, 255, 255, 0.5);}")
+                  }")
          
          (log:debug "Creating preview for" url)
 
