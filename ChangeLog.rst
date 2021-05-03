@@ -2,6 +2,12 @@
  Changelog
 ===========
 
+0.3.1 (2021-05-03)
+==================
+
+* Fixed redering in case there are two different workflows with the same name
+  one of which was disabled at the GitHub.
+
 0.3.0 (2021-05-01)
 ==================
 

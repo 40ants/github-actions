@@ -13,15 +13,18 @@
    (name :initarg :name
          :reader name)
    (path :initarg :path
-         :reader path)))
+         :reader path)
+   (content-cache :initform nil
+                  :initarg :content-cache)))
 
 
-(defun make-workflow (repo id name path)
+(defun make-workflow (repo id name path &optional content)
   (make-instance 'workflow
                  :repo repo
                  :id id
                  :name name
-                 :path path))
+                 :path path
+                 :content-cache content))
 
 
 (defmethod print-object ((obj workflow) stream)
@@ -37,6 +40,9 @@
                                              (github-matrix/repo::project repo)))
         for item in (getf response :|workflows|)
         for path = (getf item :|path|)
+        for content = (when path
+                        (github-matrix/repo::get-file repo
+                                                      path))
         ;; Some repositories returns workflows without paths.
         ;; Probably that is because something is broken inside
         ;; the GitHub. Here is an example:
@@ -44,16 +50,22 @@
         ;; 
         ;; We need to know YAML config of the workflow. That is why
         ;; workflows without a path should be filtered out.
-        unless (string= path "")
-          collect (make-workflow repo
-                                 (getf item :|id|)
-                                 (getf item :|name|)
-                                 (getf item :|path|))))
+        unless (or (string= path "")
+                   (null content))
+        collect (make-workflow repo
+                               (getf item :|id|)
+                               (getf item :|name|)
+                               (getf item :|path|)
+                               content)))
 
 
 (defun workflow-content (workflow)
-  (github-matrix/repo::get-file (repo workflow)
-                                (path workflow)))
+  (with-slots (content-cache)
+      workflow
+    (or content-cache
+        (setf content-cache
+              (github-matrix/repo::get-file (repo workflow)
+                                            (path workflow))))))
 
 
 
