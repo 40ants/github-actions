@@ -19,6 +19,7 @@
   (:import-from #:alexandria
                 #:hash-table-values)
   (:import-from #:rutils
+                #:once-only
                 #:fmt)
   (:import-from #:serapeum
                 #:defvar-unbound)
@@ -33,6 +34,9 @@
 
 (defvar-unbound *num-leaf-containers*
   "Here we'll put a number of leaf when executing a body of the WITH-LEAFS-COUNTED macro.")
+
+(defvar *fold-title-with-one-child* t
+  "This variable will be changed by the WITH-LEAFS-COUNTED macro as well. It will turn NIL as soon as we encounter a node with more than one child.")
 
 
 (defclass container (obj-with-font)
@@ -113,10 +117,17 @@
 
 
 (defmacro with-leafs-counted ((container) &body body)
-  `(let ((*num-leaf-containers* (if (boundp '*num-leaf-containers*)
-                                    *num-leaf-containers*
-                                    (count-leafs ,container))))
-     ,@body))
+  (rutils:with-gensyms (children-sym)
+    (once-only (container)
+      `(with-slots ((,children-sym children))
+           ,container
+         (let ((*num-leaf-containers* (if (boundp '*num-leaf-containers*)
+                                          *num-leaf-containers*
+                                          (count-leafs ,container)))
+               (*fold-title-with-one-child* (and *fold-title-with-one-child*
+                                                 (< (hash-table-count ,children-sym)
+                                                    2)) ))
+           ,@body)))))
 
 
 (defun leafs-count ()
@@ -232,8 +243,9 @@
 
 (defun should-we-render-only-a-child (container)
   (and (not (typep container 'tight-container))
-       (= *num-leaf-containers*
-          1)))
+       (or (= *num-leaf-containers*
+              1)
+           *fold-title-with-one-child*)))
 
 
 (defmethod draw :around ((obj container) svg)

@@ -2,6 +2,12 @@
  Changelog
 ===========
 
+0.3.2 (2021-05-03)
+==================
+
+* Algorithm fixed to make badge more compact when there are
+  nested containers having a single child.
+
 0.3.1 (2021-05-03)
 ==================
 
