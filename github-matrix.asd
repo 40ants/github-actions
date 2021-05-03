@@ -1,5 +1,5 @@
 (defsystem "github-matrix"
-  :version "0.1.0"
+  :version "0.3.0"
   :author "Alexander Artemenko"
   :license "Unlicense"
   :class :package-inferred-system

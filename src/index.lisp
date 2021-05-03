@@ -1,6 +1,7 @@
 (defpackage #:github-matrix/index
   (:use #:cl)
   (:import-from #:spinneret)
+  (:import-from #:spinneret/cl-markdown)
   (:import-from #:rutils
                 #:fmt)
   (:import-from #:github-matrix/utils
@@ -18,6 +19,11 @@
     "https://github.com/signalapp/Signal-Desktop"
     "https://github.com/snowpackjs/snowpack"
     "https://github.com/stephenmcd/mezzanine"))
+
+
+(defparameter *version*
+  (asdf:component-version
+   (asdf:find-system :github-matrix)))
 
 
 (defvar *analytics-code*
@@ -140,7 +146,13 @@
            (setf url demo-url
                  is-demo t)
 
-           (:style ".preview {
+           (:style ".footer {
+                      color: #999;
+                      border-top: 1px solid gray;
+                      text-align: center;
+                      margin-top: 4em;
+                    }
+                    .preview {
                       position: relative;}
                     
                     .preview:before {
@@ -192,4 +204,34 @@
                            badge-url))))
                    (t (if (string= url "")
                           (:p "ERROR: Please, enter the URL")
-                          (:p "ERROR: Unable to parse URL"))))))))))))
+                          (:p "ERROR: Unable to parse URL")))))
+
+           (:h2 "Selecting a subset of the matrix")
+           
+           (:p "You can use " (:code "only") "parameter to select a subset of workflows and jobs. "
+               "It should be a comma-separated list of paths, where each path consist of a workflow
+                name, job name and job parameters, separated with dots")
+           
+           (:p "For example if the full matrix is:")
+           (:p (:img :src "/40ants/ci/matrix.svg"))
+           
+           (:p ("Then you might want to show only the linter and docs badge. Add this code to SVG URL:
+
+```
+?only=ci.linter,docs
+```
+
+Here `ci` and `docs` are names of workflows, and `linter` is a job's name inside the `ci` workflow.
+
+All other runs will be filtered and you'll smaller badge:
+ "))
+           (:p (:img :src "/40ants/ci/matrix.svg?only=ci.linter,docs"))
+           (:p "Also, you might filter runs further providing values for matrix parameters.")
+
+           (:p ("For example, if we want to render only a single plate for tests running under Ubuntu OS,
+and Ultralisp distribution, then we can add `?only=ci.run-tests.ubuntu-latest.ultralisp` to the URL and
+result will be:"))
+           (:img :src "/40ants/ci/matrix.svg?only=ci.run-tests.ubuntu-latest.ultralisp")
+
+           (:div :class "footer"
+                 ("Site version: ~A. Made with [Common Lisp](https://lisp-lang.org/)!" *version*)))))))))
