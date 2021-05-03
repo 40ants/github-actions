@@ -113,9 +113,6 @@
   `(let ((*num-leaf-containers* (if (boundp '*num-leaf-containers*)
                                     *num-leaf-containers*
                                     (count-leafs ,container))))
-     (format t "NUM LEAFS FOR Cont: ~S - ~S~%"
-             ,container
-             *num-leaf-containers*)
      ,@body))
 
 
