@@ -23,6 +23,9 @@
                 #:job-name)
   (:import-from #:github-matrix/base-obj)
   (:import-from #:github-matrix/svg)
+  (:import-from #:github-matrix/container
+                #:leafs-count
+                #:with-leafs-counted)
   (:export
    #:stop
    #:start
@@ -141,38 +144,46 @@
               repo))
 
 
-      (let* ((width (github-matrix/base-obj::width document))
-             (footer-text "Rendered by github-actions.40ants.com")
-             (footer-font-family "Helvetica")
-             (footer-font-weight "bold")
-             (footer-font-size 8)
-             (footer-height (* footer-font-size
-                               2))
-             (font-data (anafanafo:load-data :family footer-font-family
-                                             :weight footer-font-weight
-                                             :size footer-font-size))
-             (footer-width (anafanafo:string-width font-data
-                                                   footer-text))
-             (height (+ (github-matrix/base-obj::height document)
-                         footer-height))
-             (svg (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
-                                            :width width
-                                            :height height)))
-        (github-matrix/base-obj::draw document svg)
-        
-        (github-matrix/svg:text
-            (cl-svg:link svg (:xlink-href "https://github-actions.40ants.com/"))
-            footer-text
-          :x (- width footer-width)
-          :y (- height footer-font-size)
-          :font-family footer-font-family
-          :font-weight footer-font-weight
-          :font-size footer-font-size
-          :color github-matrix/colors:*link-color*
-          :shadow-opacity 0.2)
-        
-        (with-output-to-string (s)
-          (cl-svg:stream-out s svg))))))
+      (with-leafs-counted (document)
+        (let* ((width (github-matrix/base-obj::width document))
+               (draw-footer (> (leafs-count)
+                               1))
+               (footer-text "Rendered by github-actions.40ants.com")
+               (footer-font-family "Helvetica")
+               (footer-font-weight "bold")
+               (footer-font-size 8)
+               (footer-height (if draw-footer
+                                  (* footer-font-size
+                                     2)
+                                  0))
+               (font-data (anafanafo:load-data :family footer-font-family
+                                               :weight footer-font-weight
+                                               :size footer-font-size))
+               (footer-width (if draw-footer
+                                 (anafanafo:string-width font-data
+                                                         footer-text)
+                                 0))
+               (height (+ (github-matrix/base-obj::height document)
+                           footer-height))
+               (svg (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
+                                              :width width
+                                              :height height)))
+          (github-matrix/base-obj::draw document svg)
+         
+          (when draw-footer
+            (github-matrix/svg:text
+                (cl-svg:link svg (:xlink-href "https://github-actions.40ants.com/"))
+                footer-text
+              :x (- width footer-width)
+              :y (- height footer-font-size)
+              :font-family footer-font-family
+              :font-weight footer-font-weight
+              :font-size footer-font-size
+              :color github-matrix/colors:*link-color*
+              :shadow-opacity 0.2))
+         
+          (with-output-to-string (s)
+            (cl-svg:stream-out s svg)))))))
 
 
 (defun parse-params (query-string)

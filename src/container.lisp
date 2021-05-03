@@ -21,7 +21,10 @@
   (:import-from #:rutils
                 #:fmt)
   (:import-from #:serapeum
-                #:defvar-unbound))
+                #:defvar-unbound)
+  (:export
+   #:with-leafs-counted
+   #:leafs-count))
 (in-package github-matrix/container)
 
 
@@ -114,6 +117,10 @@
                                     *num-leaf-containers*
                                     (count-leafs ,container))))
      ,@body))
+
+
+(defun leafs-count ()
+  *num-leaf-containers*)
 
 
 (defun count-leafs (container)

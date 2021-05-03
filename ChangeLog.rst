@@ -18,6 +18,10 @@
   and job parameters, separated with dots::
 
     only=ci.run-tests.ubuntu-latest.ultralisp,ci.linter
+* Footer with text "Rendered by github-actions.40ants.com" now disappears
+  if only a single compact badge is rendered because of ``only`` argument
+  effect. This feature should resolve issue
+  https://github.com/40ants/github-matrix/issues/2
 
 0.2.0 (2021-02-09)
 ==================
