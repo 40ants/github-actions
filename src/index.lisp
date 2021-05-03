@@ -206,6 +206,7 @@
                           (:p "ERROR: Please, enter the URL")
                           (:p "ERROR: Unable to parse URL")))))
 
+           (:a :name "matrix-subset")
            (:h2 "Selecting a subset of the matrix")
            
            (:p "You can use " (:code "only") "parameter to select a subset of workflows and jobs. "
