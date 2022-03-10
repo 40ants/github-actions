@@ -2,6 +2,14 @@
 Github Matrix
 =============
 
+WARNING!
+========
+
+Because of Visa and Mastercard sanctions against Russua, I'm unable to pay for Heroku hosting anymore and soon server will stop working on the domain `github-actions.40ants.com`
+
+Goals
+=====
+
 This project's aim is to give all repositories tested by
 Github Actions a way to show the full build status.
 
