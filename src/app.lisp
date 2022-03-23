@@ -298,7 +298,7 @@
    '(:level :debug
      ;; Here I want to use :json instead of plain
      ;; but don't know how to use structured logs with Heroku.
-     :appenders ((this-console :layout :plain)))))
+     :appenders ((this-console :layout :json)))))
 
 
 (defun setup-logging-for-dev ()
