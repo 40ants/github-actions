@@ -295,7 +295,7 @@
 
 (defun setup-logging-for-prod ()
   (log4cl-extras/config:setup
-   '(:level :debug
+   '(:level :error
      ;; Here I want to use :json instead of plain
      ;; but don't know how to use structured logs with Heroku.
      :appenders ((this-console :layout :json)))))
