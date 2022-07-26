@@ -1,0 +1,9 @@
+.git/
+.qlot/
+env/
+quicklisp/
+build/
+postgresql-data/
+logs/
+db/dumps/
+app

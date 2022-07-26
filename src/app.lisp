@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/app
+(defpackage #:app/app
   (:use #:cl)
   (:import-from #:clack)
   (:import-from #:woo)
@@ -10,30 +10,30 @@
   (:import-from #:rutils
                 #:starts-with
                 #:fmt)
-  (:import-from #:github-matrix/slynk)
+  (:import-from #:app/slynk)
   (:import-from #:cl-ppcre
                 #:register-groups-bind)
   (:import-from #:function-cache
                 #:defcached)
-  (:import-from #:github-matrix/repo)
-  (:import-from #:github-matrix/metrika)
-  (:import-from #:github-matrix/index)
-  (:import-from #:github-matrix/workflow)
-  (:import-from #:github-matrix/run
+  (:import-from #:app/repo)
+  (:import-from #:app/metrika)
+  (:import-from #:app/index)
+  (:import-from #:app/workflow)
+  (:import-from #:app/run
                 #:run-params
                 #:job-name)
-  (:import-from #:github-matrix/base-obj)
-  (:import-from #:github-matrix/svg)
-  (:import-from #:github-matrix/container
+  (:import-from #:app/base-obj)
+  (:import-from #:app/svg)
+  (:import-from #:app/container
                 #:leafs-count
                 #:with-leafs-counted)
-  (:import-from #:github-matrix/run-results
+  (:import-from #:app/run-results
                 #:runs-to-boxes)
   (:export
    #:stop
    #:start
    #:setup-logging-for-dev))
-(in-package github-matrix/app)
+(in-package app/app)
 
 
 (defvar *server* nil)
@@ -72,7 +72,7 @@
 (defun fetch-data (user project &key branch only)
   (flet ((workflow-is-allowed (workflow)
            (or (null only)
-               (assoc (github-matrix/workflow::name workflow)
+               (assoc (app/workflow::name workflow)
                       only
                       :test #'string-equal)))
          (make-run-filter (workflow)
@@ -81,7 +81,7 @@
                          for workflow-name = (car rule)
                          for job-params = (cdr rule)
                          when (and (string-equal workflow-name
-                                                 (github-matrix/workflow::name
+                                                 (app/workflow::name
                                                   workflow))
                                    job-params)
                          collect job-params)))
@@ -99,23 +99,23 @@
                                      (zerop position)))))
                (t
                 (constantly t))))))
-    (let* ((repo (github-matrix/repo::make-repo user project
+    (let* ((repo (app/repo::make-repo user project
                                                 :branch branch))
            (workflows (remove-if-not #'workflow-is-allowed
-                                     (github-matrix/workflow::get-workflows repo)))
+                                     (app/workflow::get-workflows repo)))
            (all-runs nil)
            (document
-             (loop with root = (github-matrix/container::make-container "All Workflows")
+             (loop with root = (app/container::make-container "All Workflows")
                    for workflow in workflows
-                   for workflow-name = (github-matrix/workflow::name workflow)
+                   for workflow-name = (app/workflow::name workflow)
                    for runs = (remove-if-not
                                (make-run-filter workflow)
-                               (github-matrix/run::get-last-run workflow))
+                               (app/run::get-last-run workflow))
                    for workflow-box = (runs-to-boxes workflow
                                                                                 :runs runs)
                    collect runs into collected-runs
                    when workflow-box
-                   do (setf (github-matrix/container::child root workflow-name)
+                   do (setf (app/container::child root workflow-name)
                             workflow-box)
                    finally (setf all-runs collected-runs)
                            (return root))))
@@ -148,7 +148,7 @@
 
 
       (with-leafs-counted (document)
-        (let* ((width (github-matrix/base-obj::width document))
+        (let* ((width (app/base-obj::width document))
                (draw-footer (> (leafs-count)
                                1))
                (footer-text "Rendered by github-actions.40ants.com")
@@ -166,15 +166,15 @@
                                  (anafanafo:string-width font-data
                                                          footer-text)
                                  0))
-               (height (+ (github-matrix/base-obj::height document)
+               (height (+ (app/base-obj::height document)
                            footer-height))
                (svg (cl-svg:make-svg-toplevel 'cl-svg:svg-1.1-toplevel
                                               :width width
                                               :height height)))
-          (github-matrix/base-obj::draw document svg)
+          (app/base-obj::draw document svg)
          
           (when draw-footer
-            (github-matrix/svg:text
+            (app/svg:text
                 (cl-svg:link svg (:xlink-href "https://github-actions.40ants.com/"))
                 footer-text
               :x (- width footer-width)
@@ -182,7 +182,7 @@
               :font-family footer-font-family
               :font-weight footer-font-weight
               :font-size footer-font-size
-              :color github-matrix/colors:*link-color*
+              :color app/colors:*link-color*
               :shadow-opacity 0.2))
          
           (with-output-to-string (s)
@@ -233,7 +233,7 @@
                  (null path-info))
              (list 200
                    '(:content-type "text/html")
-                   (list (apply 'github-matrix/index:render env params))))
+                   (list (apply 'app/index:render env params))))
             
             ((and (string= "/debug" path-info)
                   *debug*)
@@ -253,7 +253,7 @@
 
                ;; Register the hit in the Analytics
                (unless demo
-                 (github-matrix/metrika:hit path-info))
+                 (app/metrika:hit path-info))
                
                ;; Return SVG in response
                (list 200
@@ -268,29 +268,6 @@
                    '(:content-type "text/plain")
                    (list (fmt "Path \"~A\" not supported."
                               path-info))))))))))
-
-
-(defun start (port &key (debug nil)
-                        (address "0.0.0.0"))
-  (setf github-matrix/metrika:*enabled*
-        (not debug))
-
-  (setf *debug* debug)
-
-  (when *debug*
-    (reset-cache-timeout 1))
-  
-  (setf *server*
-        (clack:clackup 'process-request
-                       :server :woo
-                       :address address
-                       :debug debug
-                       :port port)))
-
-(defun stop ()
-  (when *server*
-    (clack:stop *server*)
-    (setf *server* nil)))
 
 
 (defun setup-logging-for-prod ()
@@ -328,8 +305,8 @@
         (debug (when (uiop:getenv "DEBUG")
                  t)))
 
-    (github-matrix/slynk:start slynk-interface
-                               slynk-port)
+    (app/slynk:start slynk-interface
+		     slynk-port)
     
     (log:info "Starting HTTP server on" port "with" debug)
     (start port :debug debug)))
