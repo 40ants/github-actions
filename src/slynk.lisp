@@ -5,7 +5,6 @@
                 #:define-global-var)
 
   (:import-from #:slynk)
-  (:import-from #:slynk-macrostep)
   (:import-from #:slynk-named-readtables)
   (:import-from #:slynk-package-inferred)
   
