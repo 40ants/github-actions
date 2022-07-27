@@ -1,6 +1,6 @@
-(uiop:define-package #:github-matrix/box
+(uiop:define-package #:app/box
   (:use #:cl)
-  (:import-from #:github-matrix/base-obj
+  (:import-from #:app/base-obj
                 #:obj-with-font
                 #:draw
                 #:width
@@ -8,9 +8,9 @@
                 #:font-family
                 #:font-weight
                 #:font-size)
-  (:import-from #:github-matrix/svg
+  (:import-from #:app/svg
                 #:draw-box-with-text))
-(in-package github-matrix/box)
+(in-package app/box)
 
 
 (defclass box (obj-with-font)

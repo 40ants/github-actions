@@ -1,6 +1,6 @@
-(uiop:define-package #:github-matrix/base-obj
+(uiop:define-package #:app/base-obj
   (:use #:cl))
-(in-package github-matrix/base-obj)
+(in-package app/base-obj)
 
 
 (defparameter *default-font-size* 16)

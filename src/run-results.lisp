@@ -1,10 +1,10 @@
-(uiop:define-package #:github-matrix/run-results
+(uiop:define-package #:app/run-results
   (:use #:cl)
-  (:import-from #:github-matrix/run)
-  (:import-from #:github-matrix/container)
-  (:import-from #:github-matrix/workflow)
-  (:import-from #:github-matrix/matrix)
-  (:import-from #:github-matrix/box
+  (:import-from #:app/run)
+  (:import-from #:app/container)
+  (:import-from #:app/workflow)
+  (:import-from #:app/matrix)
+  (:import-from #:app/box
                 #:success-box
                 #:fail-box
                 #:in-progress-box)
@@ -13,7 +13,7 @@
                 #:fmt)
   (:import-from #:str
                 #:containsp))
-(in-package github-matrix/run-results)
+(in-package app/run-results)
 
 
 (defun parse-run-name (workflow-matrix run)
@@ -42,8 +42,8 @@
    (\"job=linter\")
    ```
 "
-  (let ((job-name (github-matrix/run:job-name run))
-        (run-params (github-matrix/run:run-params run)))
+  (let ((job-name (app/run:job-name run))
+        (run-params (app/run:run-params run)))
     (let ((job-matrix (cdr (assoc job-name workflow-matrix
                                   :test #'string-equal))))
       (list* (format nil "JOB = ~A"
@@ -55,7 +55,7 @@
                                    param))))))
 
 
-(defun runs-to-boxes (workflow &key (runs (github-matrix/run::get-last-run workflow)))
+(defun runs-to-boxes (workflow &key (runs (app/run::get-last-run workflow)))
   "This is the core function which forms the structure of the badge.
 
    It transforms RUNS (received using GET-LAST-RUN function) in to a containers with run statuses.
@@ -63,17 +63,17 @@
    RUNS can contains runs from different jobs."
   (cond
     (workflow
-     (let* ((matrix (github-matrix/matrix::workflow-matrix workflow))
-            (workflow-name (github-matrix/workflow::name workflow))
-            (workflow-path (github-matrix/workflow::path workflow))
-            (github-matrix/base-obj::*default-font-size* 20)
+     (let* ((matrix (app/matrix::workflow-matrix workflow))
+            (workflow-name (app/workflow::name workflow))
+            (workflow-path (app/workflow::path workflow))
+            (app/base-obj::*default-font-size* 20)
             ;; This is how much we'll reduce the font size on each
             ;; level of GitHub matrix:
             (font-size-ratio 0.85))
 
        (labels ((add-box-to (node names &key box-type)
-                  (let ((github-matrix/base-obj::*default-font-size*
-                          (* github-matrix/base-obj::*default-font-size*
+                  (let ((app/base-obj::*default-font-size*
+                          (* app/base-obj::*default-font-size*
                              font-size-ratio)))
                     (cond
                       ((= (length names)
@@ -83,30 +83,30 @@
                            ((containsp "=" name)
                             (destructuring-bind (group-name cell-name)
                                 (cl-ppcre:split " = " name)
-                              (let* ((node (github-matrix/container::child
+                              (let* ((node (app/container::child
                                             node group-name
-                                            (github-matrix/container::make-tight-container group-name))))
-                                (setf (github-matrix/container::child node cell-name)
+                                            (app/container::make-tight-container group-name))))
+                                (setf (app/container::child node cell-name)
                                       (make-instance box-type
                                                      :text cell-name)))))
                            ;; When there is no =, we just add it as a box of the given type
                            (t
-                            (setf (github-matrix/container::child node name)
+                            (setf (app/container::child node name)
                                   (make-instance box-type
                                                  :text name))))))
                       ((> (length names)
                           1)
-                       (add-box-to (github-matrix/container::child node (car names))
+                       (add-box-to (app/container::child node (car names))
                                    (cdr names)
                                    :box-type box-type))))))
          (cond
            (runs
-            (loop with root = (github-matrix/container::make-container workflow-name
+            (loop with root = (app/container::make-container workflow-name
                                                                        :comment workflow-path)
                   for run in runs
-                  for run-name = (github-matrix/run::name run)
-                  for status = (github-matrix/run::status run)
-                  for conclusion = (github-matrix/run::conclusion run)
+                  for run-name = (app/run::name run)
+                  for status = (app/run::status run)
+                  for conclusion = (app/run::conclusion run)
                   for box-type = (case status
                                    (:completed
                                     (case conclusion
@@ -131,10 +131,10 @@
            ;; When no runs, we want to render an in progress
            ;; box foro this workflow:
            (t
-            (let ((root (github-matrix/container::make-tight-container workflow-name
+            (let ((root (app/container::make-tight-container workflow-name
                                                                        :comment workflow-path)))
               (add-box-to root (list "Waiting For A Run")
-                          :box-type 'github-matrix/box::in-progress-box)))))))
+                          :box-type 'app/box::in-progress-box)))))))
     (t
-     (make-instance 'github-matrix/box::in-progress-box
+     (make-instance 'app/box::in-progress-box
                     :text "No Github Actions Workflow Found :(" ))))

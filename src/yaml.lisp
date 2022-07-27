@@ -1,7 +1,7 @@
-(uiop:define-package #:github-matrix/yaml
+(uiop:define-package #:app/yaml
   (:use #:cl)
   (:import-from #:cl-yaml))
-(in-package github-matrix/yaml)
+(in-package app/yaml)
 
 
 (defun parse-string (yaml-string)

@@ -68,9 +68,9 @@ How to test locally
 
 ::
 
-   (ql:quickload :github-matrix/app)
+   (ql:quickload :app)
    
-   (github-matrix/app:start 8081 :debug t)
+   (app/server:start 8081 :debug t)
 
 TODO
 ====

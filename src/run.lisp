@@ -1,13 +1,13 @@
-(uiop:define-package #:github-matrix/run
+(uiop:define-package #:app/run
   (:use #:cl)
-  (:import-from #:github-matrix/repo)
-  (:import-from #:github-matrix/workflow)
+  (:import-from #:app/repo)
+  (:import-from #:app/workflow)
   (:import-from #:alexandria
                 #:make-keyword)
   (:export
    #:job-name
    #:run-params))
-(in-package github-matrix/run)
+(in-package app/run)
 
 
 (defclass run ()
@@ -36,11 +36,11 @@
 
 (defun get-last-run (workflow)
   (when workflow
-    (let* ((repo (github-matrix/workflow::repo workflow))
-           (workflow-id (github-matrix/workflow::id workflow))
-           (user (github-matrix/repo::user repo))
-           (project (github-matrix/repo::project repo))
-           (branch (github-matrix/repo::branch repo))
+    (let* ((repo (app/workflow::repo workflow))
+           (workflow-id (app/workflow::id workflow))
+           (user (app/repo::user repo))
+           (project (app/repo::project repo))
+           (branch (app/repo::branch repo))
            (response (github:get "/repos/~A/~A/actions/workflows/~A/runs?branch=~A"
                                  :params (list user
                                                project
@@ -65,7 +65,7 @@
 
 (defun job-name (run)
   (check-type run run)
-  (let ((run-name (github-matrix/run::name run)))
+  (let ((run-name (app/run::name run)))
     (or
      (cl-ppcre:register-groups-bind (job-name)
          ("(.*?) \\((?:.*)\\)" run-name)
@@ -93,7 +93,7 @@
   
   (check-type run run)
   
-  (let ((run-name (github-matrix/run::name run)))
+  (let ((run-name (app/run::name run)))
     (cl-ppcre:register-groups-bind (params)
         ("(?:.*?) \\((.*)\\)" run-name)
       (let ((params (cl-ppcre:split ", " params)))

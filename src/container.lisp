@@ -1,6 +1,6 @@
-(uiop:define-package #:github-matrix/container
+(uiop:define-package #:app/container
   (:use #:cl)
-  (:import-from #:github-matrix/base-obj
+  (:import-from #:app/base-obj
                 #:obj-with-font
                 #:draw
                 #:width
@@ -8,13 +8,13 @@
                 #:font-family
                 #:font-weight
                 #:font-size)
-  (:import-from #:github-matrix/box
+  (:import-from #:app/box
                 #:in-progress-box)
-  (:import-from #:github-matrix/colors
+  (:import-from #:app/colors
                 #:*title-color*
                 #:*tight-container-title-background*
                 #:*tight-container-title-color*)
-  (:import-from #:github-matrix/svg
+  (:import-from #:app/svg
                 #:draw-box-with-text)
   (:import-from #:alexandria
                 #:hash-table-values)
@@ -26,7 +26,7 @@
   (:export
    #:with-leafs-counted
    #:leafs-count))
-(in-package github-matrix/container)
+(in-package app/container)
 
 
 (defvar *debug-sizes* nil)
@@ -81,7 +81,7 @@
                                          title-background)
   (declare (ignore initargs))
   (setf (slot-value obj 'title-box)
-        (make-instance 'github-matrix/box::title-box
+        (make-instance 'app/box::title-box
                        :text title
                        :color title-color
                        :background title-background)))
@@ -93,11 +93,11 @@
           new-value)))
 
 
-(defmethod (setf child) :after ((new-value github-matrix/box::box) (obj tight-container) name)
+(defmethod (setf child) :after ((new-value app/box::box) (obj tight-container) name)
   "Boxes inside the tight container should not have
    round corners."
   (setf (slot-value new-value
-                    'github-matrix/box::corners-radius)
+                    'app/box::corners-radius)
         nil))
 
 
@@ -296,7 +296,7 @@
             :stroke "#FFAA66"
             :fill "white"))
 
-      (github-matrix/svg:text group title
+      (app/svg:text group title
         :x margin
         :y (+ margin font-size)
         :font-family font-family

@@ -1,4 +1,4 @@
-(defpackage #:github-matrix/metrika
+(uiop:define-package #:app/metrika
   (:use #:cl)
   (:import-from #:cl-yandex-metrika)
   (:import-from #:log4cl-extras/error
@@ -6,7 +6,7 @@
   (:export
    #:hit
    #:*enabled*))
-(in-package github-matrix/metrika)
+(in-package app/metrika)
 
 
 (defvar *enabled* t)

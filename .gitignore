@@ -2,3 +2,4 @@
 /lispapp
 .DS_Store
 *~
+*.fasl

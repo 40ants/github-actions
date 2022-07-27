@@ -1,8 +1,8 @@
-(uiop:define-package #:github-matrix/matrix
+(uiop:define-package #:app/matrix
   (:use #:cl)
-  (:import-from #:github-matrix/workflow)
-  (:import-from #:github-matrix/yaml))
-(in-package github-matrix/matrix)
+  (:import-from #:app/workflow)
+  (:import-from #:app/yaml))
+(in-package app/matrix)
 
 
 
@@ -13,7 +13,7 @@
 
 
 (defun parse-matrix (workflow-content)
-  (let* ((doc (getf (github-matrix/yaml::parse-string workflow-content)
+  (let* ((doc (getf (app/yaml::parse-string workflow-content)
                     :documents)))
     (flet ((g (node name)
              (second (assoc name node :test 'string-equal))))
@@ -30,6 +30,6 @@
 
 
 (defun workflow-matrix (workflow)
-  (let ((content (github-matrix/workflow::workflow-content workflow)))
+  (let ((content (app/workflow::workflow-content workflow)))
     (when content
       (parse-matrix content))))

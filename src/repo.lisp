@@ -1,10 +1,10 @@
-(uiop:define-package #:github-matrix/repo
+(uiop:define-package #:app/repo
   (:use #:cl)
   (:import-from #:rutils
                 #:fmt)
   (:import-from #:dexador)
   (:import-from #:github))
-(in-package github-matrix/repo)
+(in-package app/repo)
 
 
 (defclass repo ()

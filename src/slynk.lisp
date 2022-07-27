@@ -1,23 +1,25 @@
-(defpackage #:github-matrix/slynk
+(uiop:define-package #:app/slynk
   (:use #:cl)
-  (:import-from #:slynk)
   (:import-from #:log4cl)
   (:import-from #:global-vars
                 #:define-global-var)
-  (:export
-   #:*connections*
-   #:setup
-   #:start))
-(in-package github-matrix/slynk)
+
+  (:import-from #:slynk)
+  (:import-from #:slynk-macrostep)
+  (:import-from #:slynk-named-readtables)
+  (:import-from #:slynk-package-inferred)
+  
+  (:export #:*connections*
+           #:start-slynk-if-needed))
+(in-package #:app/slynk)
 
 
 (define-global-var *connections* nil
   "Here we'll store all Slynk connections.")
 
-(defvar slynk:*use-dedicated-output-stream* nil
-  "This var is defined only on SLY connection by MREPL
-   plugin. Here we'll define it before this will happen
-   to be able to set the value to nil in the START function.")
+;; We need to define this variable before slynk will load
+;; mrepl plugin.
+(defvar slynk:*use-dedicated-output-stream*)
 
 
 (defun on-connection-open (conn)
@@ -31,23 +33,22 @@
         (remove conn *connections*)))
 
 
-(defun setup ()
-  ;; To make it possible to connect to a remote SLYNK server where ports are closed
-  ;; with firewall.
-  (setf slynk:*use-dedicated-output-stream* nil)
-  
-  (slynk-api:add-hook slynk-api:*new-connection-hook*
-                      'on-connection-open)
-  (slynk-api:add-hook slynk-api:*connection-closed-hook*
-                      'on-connection-close)
+(defun start-slynk-if-needed ()
+  (when (uiop:getenv "SLYNK_PORT")
+    (let ((port (parse-integer (uiop:getenv "SLYNK_PORT")))
+	  (interface (or (uiop:getenv "SLYNK_INTERFACE")
+			 "127.0.0.1"))
+	  (hostname (machine-instance)))
+      (slynk-api:add-hook slynk-api:*new-connection-hook*
+			  'on-connection-open)
+      (slynk-api:add-hook slynk-api:*connection-closed-hook*
+			  'on-connection-close)
+      (setf slynk:*use-dedicated-output-stream* nil)
+      (slynk:create-server :dont-close t
+                           :port port
+                           :interface interface)
+      (format t "Run ssh -6 -L ~A:localhost:4005 ~A~%"
+              port
+              hostname)
+      (format t "Then open local Emacs and connect to the slynk on 4005 port~%")))
   (values))
-
-
-(defun start (interface port)
-  (log:info "Starting SLYNK server on" interface port)
-
-  (setup)
-  
-  (slynk:create-server :dont-close t
-                       :interface interface
-                       :port port))

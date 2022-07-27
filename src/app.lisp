@@ -1,4 +1,4 @@
-(defpackage #:app/app
+(uiop:define-package #:app/app
   (:use #:cl)
   (:import-from #:clack)
   (:import-from #:woo)
@@ -29,14 +29,9 @@
                 #:with-leafs-counted)
   (:import-from #:app/run-results
                 #:runs-to-boxes)
-  (:export
-   #:stop
-   #:start
-   #:setup-logging-for-dev))
+  (:export #:setup-logging-for-dev))
 (in-package app/app)
 
-
-(defvar *server* nil)
 
 (defvar *debug* nil)
 
@@ -284,31 +279,5 @@
      :appenders ((this-console :layout :plain)))))
 
 
-;; We need this becase Dexador's thread pool is
-;; not threadsafe yet. You'll find more details in this issue:
-;; https://github.com/fukamachi/dexador/issues/88
-(defun dexador:make-connection-pool ()
-  (make-hash-table :test 'equal
-                   #+sbcl :synchronized #+sbcl t))
-
-
-(defun cl-user::initialize-application (&key (port 8080))
-  (setup-logging-for-prod)
-
-  (setf github:*token*
-        (uiop:getenv "GITHUB_TOKEN"))
-
-  (let ((slynk-port (parse-integer (or (uiop:getenv "SLYNK_PORT")
-                                       "4005")))
-        (slynk-interface (or (uiop:getenv "SLYNK_INTERFACE")
-                             "127.0.0.1"))
-        (debug (when (uiop:getenv "DEBUG")
-                 t)))
-
-    (app/slynk:start slynk-interface
-		     slynk-port)
-    
-    (log:info "Starting HTTP server on" port "with" debug)
-    (start port :debug debug)))
 
 

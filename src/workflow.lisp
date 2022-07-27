@@ -1,8 +1,8 @@
-(uiop:define-package #:github-matrix/workflow
+(uiop:define-package #:app/workflow
   (:use #:cl)
   (:import-from #:github)
-  (:import-from #:github-matrix/repo))
-(in-package github-matrix/workflow)
+  (:import-from #:app/repo))
+(in-package app/workflow)
 
 
 (defclass workflow ()
@@ -36,12 +36,12 @@
 (defun get-workflows (repo)
   (loop with response = (github:get "/repos/~A/~A/actions/workflows"
                                     :params (list
-                                             (github-matrix/repo::user repo)
-                                             (github-matrix/repo::project repo)))
+                                             (app/repo::user repo)
+                                             (app/repo::project repo)))
         for item in (getf response :|workflows|)
         for path = (getf item :|path|)
         for content = (when path
-                        (github-matrix/repo::get-file repo
+                        (app/repo::get-file repo
                                                       path))
         ;; Some repositories returns workflows without paths.
         ;; Probably that is because something is broken inside
@@ -64,8 +64,8 @@
       workflow
     (or content-cache
         (setf content-cache
-              (github-matrix/repo::get-file (repo workflow)
-                                            (path workflow))))))
+              (app/repo::get-file (repo workflow)
+                                  (path workflow))))))
 
 
 

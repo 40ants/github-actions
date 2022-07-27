@@ -5,7 +5,16 @@ exec ros -Q -- $0 "$@"
 |#
 (progn ;;init forms
   (ros:ensure-asdf)
-  #+quicklisp(ql:quickload '("app/server") :silent t))
+  #+quicklisp
+  (ql:quickload (list "app/server"
+                      "slynk/arglists"
+                      "slynk/mrepl"
+                      "slynk/fancy-inspector"
+                      "slynk/package-fu"
+                      "slynk/trace-dialog"
+                      "slynk/stickers"
+                      "slynk/indentation")
+                :silent t))
 
 (defpackage :ros.script.app
   (:use :cl))
@@ -14,7 +23,18 @@ exec ros -Q -- $0 "$@"
 
 (defun main (&rest argv)
   (declare (ignorable argv))
-  (app/server:start)
+  
+  (let ((port  (parse-integer (or (uiop:getenv "APP_PORT")
+                                  "80")))
+        (interface (or (uiop:getenv "APP_INTERFACE")
+                       "0.0.0.0"))
+        (debug (when (uiop:getenv "DEBUG")
+                 t)))
+
+    (app/server:start :port port
+                      :debug debug
+                      :interface interface))
+  
   (loop do (sleep 5)))
 
 ;;; vim: set ft=lisp lisp:

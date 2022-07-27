@@ -1,4 +1,4 @@
-(uiop:define-package #:github-matrix/svg
+(uiop:define-package #:app/svg
   (:use #:cl)
   (:import-from #:cl-svg)
   (:import-from #:anafanafo
@@ -6,7 +6,7 @@
   (:export
    #:draw-box-with-text
    #:text))
-(in-package github-matrix/svg)
+(in-package app/svg)
 
 
 (defun text (parent

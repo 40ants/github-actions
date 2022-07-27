@@ -1,16 +1,16 @@
-(defpackage #:github-matrix/index
+(uiop:define-package #:app/index
   (:use #:cl)
   (:import-from #:spinneret)
   (:import-from #:spinneret/cl-markdown)
   (:import-from #:rutils
                 #:fmt)
-  (:import-from #:github-matrix/utils
+  (:import-from #:app/utils
                 #:get-base-url)
   (:import-from #:cl-ppcre
                 #:register-groups-bind)
   (:export
    #:render))
-(in-package github-matrix/index)
+(in-package app/index)
 
 
 (defparameter *demo-urls*
@@ -23,7 +23,7 @@
 
 (defparameter *version*
   (asdf:component-version
-   (asdf:find-system :github-matrix)))
+   (asdf:find-system :app)))
 
 
 (defvar *analytics-code*
@@ -101,7 +101,7 @@
       ;; Ribbon from:
       ;; https://github.com/simonwhitaker/github-fork-ribbon-css
       (:a :class "github-fork-ribbon"
-          :href "https://github.com/40ants/github-matrix"
+          :href "https://github.com/40ants/github-actions"
           :data-ribbon "Fork me on GitHub"
           :title "Fork me on GitHub"
           "Fork me on GitHub")
@@ -207,7 +207,7 @@
                           (:p "ERROR: Please, enter the URL")
                           (:p "ERROR: Unable to parse URL")))))
 
-           (:a :name "matrix-subset")
+           (:a :id "matrix-subset")
            (:h2 "Selecting a subset of the matrix")
            
            (:p "You can use " (:code "only") "parameter to select a subset of workflows and jobs. "

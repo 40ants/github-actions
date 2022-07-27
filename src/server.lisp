@@ -1,58 +1,50 @@
 (uiop:define-package #:app/server
   (:use #:cl)
+  (:import-from #:github)
   (:import-from #:log4cl)
   (:import-from #:woo)
   (:import-from #:app/logging)
-  (:import-from #:app/app
-                #:app)
+  (:import-from #:app/app)
   (:import-from #:app/slynk
                 #:start-slynk-if-needed)
-  (:export
-   #:start))
+  (:export #:start
+           #:stop))
 (in-package #:app/server)
 
 
-(defun start (&key (port 8080)
-		(interface "localhost"))
-  ;; Just to suppres debug logs to TTY from Reblocks.
-  ;; I'll need to fix Reblocks to prohibit it from
-  ;; configure logging if they are already configured.
-  (app/logging::setup)
-  (start-slynk-if-needed)
-  (reblocks/server:start :port port
-			 :interface interface
-                         :apps 'app
-			 :server-type :woo)
-  (app/logging::setup)
-  (log:error "Server started"))
+(defvar *server* nil)
 
 
-(defun cl-user::start-server ()
-  ;; Entry point for webapp, started in the Docker
-  (start :port (parse-integer (or (uiop:getenv "APP_PORT")
-				  "80"))
-	 :interface (or (uiop:getenv "APP_INTERFACE")
-			"0.0.0.0"))
-  (loop do (sleep 5)))
-
-
-(defun start (port &key
-		     (debug nil)
-		     (address "0.0.0.0"))
+(defun start (&key
+                (port 8080)
+                (interface "localhost")
+                (debug nil))
+  (when *server*
+    (error "Server already running"))
+  
   (setf app/metrika:*enabled*
         (not debug))
 
-  (setf *debug* debug)
+  (setf app/app::*debug* debug)
 
-  (when *debug*
-    (reset-cache-timeout 1))
+  (when app/app::*debug*
+    (app/app::reset-cache-timeout 1))
+
+  (setf github:*token*
+        (uiop:getenv "GITHUB_TOKEN"))
   
+  ;; Common steps
+
+  (start-slynk-if-needed)
   (setf *server*
-        (clack:clackup 'process-request
+        (clack:clackup 'app/app::process-request
                        :server :woo
-                       :address address
+                       :address interface
                        :debug debug
-                       :port port)))
+                       :port port))
+  (app/logging::setup)
+  (log:info "Server started"))
+
 
 (defun stop ()
   (when *server*

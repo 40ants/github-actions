@@ -1,18 +1,18 @@
-(uiop:define-package #:github-matrix/playground
+(uiop:define-package #:app/playground
   (:use #:cl)
   (:import-from #:cl-svg)
-  (:import-from #:github-matrix/run-results)
-  (:import-from #:github-matrix/workflow)
-  (:import-from #:github-matrix/container
+  (:import-from #:app/run-results)
+  (:import-from #:app/workflow)
+  (:import-from #:app/container
                 #:tight-container
                 #:child)
-  (:import-from #:github-matrix/box
+  (:import-from #:app/box
                 #:box
                 #:fail-box
                 #:success-box)
-  (:import-from #:github-matrix/base-obj
+  (:import-from #:app/base-obj
                 #:draw))
-(in-package github-matrix/playground)
+(in-package app/playground)
 
 
 (defvar *repo* nil)
@@ -33,16 +33,16 @@
 
 (defun retrieve-data (&key dont-fetch-runs)
   (setf *repo*
-        (github-matrix/repo::make-repo "40ants" "cl-info" :branch "master"))
+        (app/repo::make-repo "40ants" "cl-info" :branch "master"))
 
   (setf *workflow*
-        (first (github-matrix/workflow::get-workflows *repo*)))
+        (first (app/workflow::get-workflows *repo*)))
 
   (unless dont-fetch-runs
     (setf *runs*
-          (github-matrix/run::get-last-run *workflow*)))
+          (app/run::get-last-run *workflow*)))
   
-  (setf *root* (github-matrix/run-results::runs-to-boxes *workflow* :runs *runs*)))
+  (setf *root* (app/run-results::runs-to-boxes *workflow* :runs *runs*)))
 
 
 (defun fill-test-data ()

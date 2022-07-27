@@ -1,10 +1,10 @@
-(uiop:define-package #:github-matrix/utils
+(uiop:define-package #:app/utils
   (:use #:cl)
   (:import-from #:rutils
                 #:fmt)
   (:export
    #:get-base-url))
-(in-package github-matrix/utils)
+(in-package app/utils)
 
 
 (defun get-base-url (env)

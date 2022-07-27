@@ -1,11 +1,11 @@
-(uiop:define-package #:github-matrix/colors
+(uiop:define-package #:app/colors
   (:use #:cl)
   (:export
    #:*tight-container-title-background*
    #:*tight-container-title-color*
    #:*link-color*
    #:*title-color*))
-(in-package github-matrix/colors)
+(in-package app/colors)
 
 
 (defparameter *tight-container-title-color*
