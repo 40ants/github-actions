@@ -3,7 +3,8 @@
   (:import-from #:clack)
   (:import-from #:woo)
   (:import-from #:spinneret)
-  (:import-from #:alexandria)
+  (:import-from #:alexandria
+                #:curry)
   (:import-from #:github)
   (:import-from #:log4cl-extras/error)
   (:import-from #:log4cl-extras/config)
@@ -29,6 +30,8 @@
                 #:with-leafs-counted)
   (:import-from #:app/run-results
                 #:runs-to-boxes)
+  (:import-from #:str
+                #:split)
   (:export #:setup-logging-for-dev))
 (in-package app/app)
 
@@ -205,10 +208,17 @@
           collect (mapcar #'str:trim
                           (str:split "." part)))))
 
+
+(defcached get-env-variables ()
+  (let ((lines (split #\Newline (uiop:run-program "env" :output :string))))
+    (sort (remove-if (curry #'string=  "") lines)
+          #'string<)))
+
+
 (defun process-request (env)
   (destructuring-bind (&key
-                       path-info
-                       query-string
+                         path-info
+                         query-string
                        &allow-other-keys)
       env
     (let ((params (parse-params query-string)))
@@ -244,7 +254,8 @@
                   *debug*)
              (list 200
                    '(:content-type "text/plain")
-                   (list (fmt "Last env:~%~S~2&Headers:~%~S"
+                   (list (fmt "Env:~%~{  ~A~^~%~}~2&Last request:~%~S~2&Headers:~%~S"
+                              (get-env-variables)
                               *last-env*
                               (when *last-env*
                                 (alexandria:hash-table-alist
