@@ -230,6 +230,16 @@
                    '(:content-type "text/html")
                    (list (apply 'app/index:render env params))))
             
+            ((string= "/ping" path-info)
+             (list 200
+                   '(:content-type "text/plain")
+                   (list (fmt "Host: ~A~%Arch: ~A, ~A~%Lisp: ~A, ~A~%Pid: ~A~%"
+                              (machine-instance)
+                              (machine-type)
+                              (machine-version)
+                              (lisp-implementation-type)
+                              (lisp-implementation-version)
+                              (sb-posix:getpid)))))
             ((and (string= "/debug" path-info)
                   *debug*)
              (list 200
