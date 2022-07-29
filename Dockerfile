@@ -29,12 +29,14 @@ RUN --mount=type=cache,target=/var/cache/apt \
 ENV CC=gcc
 COPY qlfile qlfile.lock app-deps.asd /app/
 
+# Here libyaml is specific to the project
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/var/lib/apt \
     set -x; \
     apt-get update && \
     apt-get install -y \
-	    gcc && \
+	    gcc \
+            libyaml-0-2 && \
     install-dependencies && \
     apt-get remove -y --auto-remove gcc
     
