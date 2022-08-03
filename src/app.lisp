@@ -241,6 +241,7 @@
                    (list (apply 'app/index:render env params))))
             
             ((string= "/ping" path-info)
+             (log:info "Responding to /ping")
              (list 200
                    '(:content-type "text/plain")
                    (list (fmt "Host: ~A~%Arch: ~A, ~A~%Lisp: ~A, ~A~%Pid: ~A~%"

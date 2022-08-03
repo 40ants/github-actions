@@ -10,19 +10,20 @@
       "development"))
 
 
-(defun setup ()
+(defun setup (&key for-dev (level :warn))
   (let ((appenders
           (cond
-            ((string-equal (current-environment)
-                           "development")
-             (list '(this-console
-                     :layout :plain
-                     :filter :warn)))
+            ((or (string-equal (current-environment)
+                               "development")
+                 for-dev)
+             (list (list 'this-console
+                         :layout :plain
+                         :filter level)))
             (t
-             (list `(this-console
-                     :stream ,*standard-output*
-                     :layout :json
-                     :filter :warn))))))
+             (list (list 'this-console
+                         :stream *standard-output*
+                         :layout :json
+                         :filter level))))))
 
     (log4cl-extras/config:setup
      (list :level :info
