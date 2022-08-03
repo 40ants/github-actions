@@ -2,6 +2,11 @@
  Changelog
 ===========
 
+0.4.0 (2022-08-03)
+==================
+
+* Switched to Hunchentoot, because it is able to process parallel requests.
+
 0.3.2 (2021-05-03)
 ==================
 

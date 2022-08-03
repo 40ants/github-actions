@@ -50,7 +50,7 @@
   :license "Unlicense"
   :description "A server to render SVG representation of Github Action's results."
   :author "Alexander Artemenko"
-  :version "0.3.2"
+  :version "0.4.0"
   ;; :pathname #P"app:src;"
   :pathname "src"
   :depends-on ("app/server"))
