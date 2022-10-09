@@ -2,3 +2,5 @@ dist ultralisp http://dist.ultralisp.org/
 
 github slynk svetlyak40wt/sly :branch experiment-with-logical-paths
 
+github dexador svetlyak40wt/dexador :branch fix-bug-with-closed-connection
+

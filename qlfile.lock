@@ -5,8 +5,12 @@
 ("ultralisp" .
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "http://dist.ultralisp.org/" :%version :latest)
-  :version "20220728091500"))
+  :version "20221002201000"))
 ("slynk" .
  (:class qlot/source/github:source-github
   :initargs (:repos "svetlyak40wt/sly" :ref nil :branch "experiment-with-logical-paths" :tag nil)
   :version "github-35f601eff75dcec5b17ea0b4223dd072aa65bcf8"))
+("dexador" .
+ (:class qlot/source/github:source-github
+  :initargs (:repos "svetlyak40wt/dexador" :ref nil :branch "fix-bug-with-closed-connection" :tag nil)
+  :version "github-7d5a0faef708eaae0ac44d4f99470b2b25a3539c"))

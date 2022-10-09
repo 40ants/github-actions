@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAME=github-actions
-VERSION=0.4.0
+VERSION=0.4.1
 
 export DOCKER_BUILDKIT=1
 

@@ -2,6 +2,12 @@
  Changelog
 ===========
 
+0.4.1 (2022-10-09)
+==================
+
+* Fixed bug with trying to reuse closed SSL connection inside Dexador:
+  https://github.com/fukamachi/dexador/issues/137
+
 0.4.0 (2022-08-03)
 ==================
 
