@@ -1,11 +1,11 @@
 ("quicklisp" .
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "http://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
-  :version "2022-07-08"))
+  :version "2023-10-21"))
 ("ultralisp" .
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "http://dist.ultralisp.org/" :%version :latest)
-  :version "20221002201000"))
+  :version "20240901062500"))
 ("slynk" .
  (:class qlot/source/github:source-github
   :initargs (:repos "svetlyak40wt/sly" :ref nil :branch "experiment-with-logical-paths" :tag nil)
@@ -13,4 +13,4 @@
 ("dexador" .
  (:class qlot/source/github:source-github
   :initargs (:repos "svetlyak40wt/dexador" :ref nil :branch "fix-bug-with-closed-connection" :tag nil)
-  :version "github-7d5a0faef708eaae0ac44d4f99470b2b25a3539c"))
+  :version "github-7117ce89845b0abf5d2e192fb7fe48bea46298a3"))

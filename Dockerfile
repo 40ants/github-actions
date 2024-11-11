@@ -44,7 +44,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 COPY . /app
 
 RUN qlot exec ros build \
-    /app/app.ros
+    roswell/github-actions-badger.ros
 
 COPY ./docker/s6-app /etc/s6
 ENTRYPOINT ["s6-svscan", "/etc/s6"]

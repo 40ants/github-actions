@@ -1,0 +1,44 @@
+#|-*- mode:lisp -*-|#
+
+(push "~/projects/40ants-lake/" asdf:*central-registry*)
+(push "~/projects/cl-mustache/" asdf:*central-registry*)
+
+(ql:quickload :40ants-lake
+              :silent t)
+
+(defpackage :lake.user
+  (:use :cl :lake)
+  (:import-from #:40ants-lake/utils
+                #:alias)
+  (:import-from #:40ants-lake/app
+                #:defapps
+                #:app)
+  (:import-from #:40ants-lake/component/webservice
+                #:webservice
+                #:proxy)
+  (:import-from #:40ants-lake/component/daemon
+                #:daemon)
+  (:import-from #:40ants-lake/env-val
+                #:env-val)
+  (:shadowing-import-from :lake
+   :directory))
+(in-package :lake.user)
+
+
+(when (probe-file ".local-config.lisp")
+  (load ".local-config.lisp"))
+
+
+(let ((backend-port (env-val :prod 10115
+                             :dev 10116)))
+  (defapps
+      (app "github-actions-badger"
+           :components (list (webservice (env-val :prod "github-actions.40ants.com"
+                                                  :dev "github-actions.dev.40ants.com")
+                                         :routes (proxy "/"
+                                                        backend-port))
+                             (daemon :environment `(("APP_PORT" . ,backend-port)
+                                                    ("APP_INTERFACE" . "localhost")
+                                                    ("SLYNK_PORT" . ,(env-val :prod 9418
+                                                                              :dev 9419))
+                                                    ("GITHUB_TOKEN" . ,(uiop:getenv "GITHUB_TOKEN"))))))))

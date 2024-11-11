@@ -3,3 +3,6 @@
 .DS_Store
 *~
 *.fasl
+.local-config.lisp
+roswell/github-actions-badger
+roswell/github-actions-badger-prod
