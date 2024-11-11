@@ -3,6 +3,7 @@
   (:import-from #:github)
   (:import-from #:log4cl)
   (:import-from #:woo)
+  (:import-from #:bordeaux-threads)
   (:import-from #:app/logging)
   (:import-from #:app/app)
   (:import-from #:app/slynk
@@ -15,12 +16,30 @@
 (defvar *server* nil)
 
 
+(defvar *gc-thread* nil)
+
+
+(defun call-gc ()
+  (loop do (sb-ext:gc :full t)
+           (sleep 60)))
+
+
+(defun start-gc-thread ()
+  (when (or (null *gc-thread*)
+            (not (bordeaux-threads:thread-alive-p *gc-thread*)))
+    (setf *gc-thread*
+          (bordeaux-threads:make-thread #'call-gc
+                                        :name "Periodical GC"))))
+
+
 (defun start (&key
                 (port 8080)
                 (interface "localhost")
                 (debug nil))
   (when *server*
     (error "Server already running"))
+
+  (start-gc-thread)
   
   (setf app/metrika:*enabled*
         (not debug))
